@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIRANDU — Command Center & Dashboard Admin BPBD Kota Jambi</title>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --primary: #0B3C5D;
+      --secondary: #1D6FA3;
+      --accent: #6EC1E4;
+      --tint: #E6F3FA;
+      --ink: #071f30;
+      --muted: #8aa9be;
+      --line: rgba(110, 193, 228, 0.2);
+      --card-bg: rgba(11, 60, 93, 0.45);
+      --card-border: rgba(110, 193, 228, 0.22);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #0d4b73 0%, #0B3C5D 35%, #06263b 70%, #041724 100%);
+      background-attachment: fixed;
+      color: #f1f5f9;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .glass-inner {
+      background: rgba(4, 21, 33, 0.6);
+      border: 1px solid rgba(110, 193, 228, 0.16);
+      border-radius: 14px;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0B3C5D;
+      font-weight: 700;
+      border-radius: 999px;
+      transition: all 0.25s cubic-bezier(.2,.7,.2,1);
+      box-shadow: 0 4px 14px rgba(110, 193, 228, 0.25);
+    }
+    .btn-accent:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(110, 193, 228, 0.4);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(110, 193, 228, 0.3);
+      color: #ffffff;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: all 0.25s;
+    }
+    .btn-ghost:hover {
+      background: rgba(110, 193, 228, 0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .input-dark {
+      background: rgba(4, 21, 33, 0.75);
+      border: 1px solid rgba(110, 193, 228, 0.25);
+      border-radius: 10px;
+      color: #ffffff;
+      transition: all 0.2s;
+    }
+    .input-dark:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(110, 193, 228, 0.25);
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: #8aa9be;
+      border: 1px solid transparent;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0B3C5D;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(110, 193, 228, 0.3);
+    }
+    .tab-btn:not(.active):hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(110, 193, 228, 0.2);
+    }
+
+    .badge-status {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(7, 31, 48, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(4, 21, 33, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(110, 193, 228, 0.35); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================== -->
+  <!-- 1. LOGIN SCREEN CONTAINER (Ditampilkan bila belum login) -->
+  <!-- ======================================================== -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 border-[#6EC1E4]/30 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#6EC1E4]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3 rounded-2xl bg-[#0B3C5D] border border-[#6EC1E4]/40 shadow-inner mb-3">
+          <img src="/logo.png" alt="SIRANDU" class="w-12 h-12 object-contain" onerror="this.src='/logo-mark.png';">
+        </div>
+        <h1 class="text-2xl font-black tracking-tight text-white">SIRANDU Command Center</h1>
+        <p class="text-xs text-[#8aa9be] mt-1">Portal Administrator & Pengelolaan Spasial Kebencanaan Kota Jambi</p>
+      </div>
+
+      <form id="formLogin" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Username Petugas</label>
+          <input type="text" id="loginUsername" required value="admin" class="w-full px-4 py-2.5 text-sm input-dark" placeholder="Masukkan username admin">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+          <input type="password" id="loginPassword" required value="admin123" class="w-full px-4 py-2.5 text-sm input-dark" placeholder="Masukkan kata sandi">
+        </div>
+
+        <div id="loginAlert" class="hidden p-3 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30"></div>
+
+        <button type="submit" id="btnLoginSubmit" class="btn-accent w-full py-3 text-sm flex items-center justify-center gap-2 mt-2">
+          <span>Masuk ke Dashboard</span>
+          <span>→</span>
+        </button>
+
+        <div class="pt-4 border-t border-[#6EC1E4]/15 flex items-center justify-between text-xs text-[#8aa9be]">
+          <span>Default: <b>admin</b> / <b>admin123</b></span>
+          <a href="/peta" class="text-[#6EC1E4] hover:underline">Buka Peta Publik ↗</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. DASHBOARD ADMIN CONTAINER (Ditampilkan setelah login) -->
+  <!-- ======================================================== -->
+  <div id="dashboardScreen" class="hidden min-h-screen flex flex-col">
+    
+    <!-- Topbar Navigation -->
+    <header class="sticky top-0 z-40 bg-[#071f30]/90 backdrop-blur-md border-b border-[#6EC1E4]/20 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        
+        <div class="flex items-center space-x-3">
+          <img src="/logo.png" alt="SIRANDU" class="w-9 h-9 object-contain" onerror="this.src='/logo-mark.png';">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-black text-white">SIRANDU</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#6EC1E4]/20 text-[#6EC1E4] border border-[#6EC1E4]/30">
+                Command Center BPBD
+              </span>
+            </div>
+            <p class="text-[11px] text-[#8aa9be]" id="adminBadgeName">Administrator SIRANDU BPBD Kota Jambi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="/peta" target="_blank" class="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#6EC1E4] text-white hover:text-[#0B3C5D] border border-white/20 transition hidden sm:inline-flex items-center gap-1.5 font-semibold">
+            <span>Peta Publik</span>
+            <span>↗</span>
+          </a>
+          <button id="btnLogout" class="text-xs px-3.5 py-1.5 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white border border-rose-500/30 transition font-bold">
+            Keluar ✕
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Sub-Navbar Tab Selector -->
+    <div class="bg-[#041724]/85 border-b border-[#6EC1E4]/15 px-4 py-2.5 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex items-center gap-2">
+        <button class="tab-btn active" data-tab="tabPosko">🏕️ Posko Pengungsian (F07)</button>
+        <button class="tab-btn" data-tab="tabAir">💧 Sumber Air Bersih (F08)</button>
+        <button class="tab-btn" data-tab="tabTitikBanjir">📍 Titik Banjir & Validasi</button>
+        <button class="tab-btn" data-tab="tabJalan">🚧 Ruas Jalan Tergenang (F09)</button>
+        <button class="tab-btn" data-tab="tabHujanManual">🌧️ Input Curah Hujan Manual</button>
+        <button class="tab-btn" data-tab="tabAmbangBobot">⚙️ Ambang Status & Bobot AHP</button>
+        <button class="tab-btn" data-tab="tabLogNotif">📜 Log Notifikasi & Warga</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: POSKO PENGUNGSIAN (F07)             -->
+      <!-- ========================================== -->
+      <section id="tabPosko" class="tab-content space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 glass-card p-5">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>🏕️</span> Kelola Posko Pengungsian & Titik Kumpul (F07)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-0.5">Tambah lokasi posko baru, atur kapasitas jiwa, kontak narahubung, dan ubah status aktif/tidak aktif.</p>
+          </div>
+          <button id="btnOpenModalPosko" class="btn-accent px-4 py-2 text-xs flex items-center gap-1.5">
+            <span>+ Tambah Posko Baru</span>
+          </button>
+        </div>
+
+        <div class="glass-card p-5 overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-200">
+            <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-3">Nama Posko</th>
+                <th class="py-3 px-3">Alamat / Wilayah</th>
+                <th class="py-3 px-3">Kapasitas (Jiwa)</th>
+                <th class="py-3 px-3">Kontak PJ</th>
+                <th class="py-3 px-3">Koordinat (Lat, Lng)</th>
+                <th class="py-3 px-3">Status Lapangan</th>
+                <th class="py-3 px-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyPosko" class="divide-y divide-[#6EC1E4]/10">
+              <tr><td colspan="7" class="py-6 text-center text-[#8aa9be]">Memuat data posko pengungsian...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: SUMBER AIR BERSIH (F08)             -->
+      <!-- ========================================== -->
+      <section id="tabAir" class="tab-content hidden space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 glass-card p-5">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>💧</span> Kelola Titik Distribusi Air Bersih (F08)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-0.5">Atur pengelola (PDAM/BPBD), tipe hidran/sumur/tangki, jam operasional, kelayakan konsumsi, dan ketersediaan.</p>
+          </div>
+          <button id="btnOpenModalAir" class="btn-accent px-4 py-2 text-xs flex items-center gap-1.5">
+            <span>+ Tambah Titik Air Bersih</span>
+          </button>
+        </div>
+
+        <div class="glass-card p-5 overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-200">
+            <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-3">Nama Lokasi</th>
+                <th class="py-3 px-3">Pengelola</th>
+                <th class="py-3 px-3">Jenis Layanan</th>
+                <th class="py-3 px-3">Jam Layanan</th>
+                <th class="py-3 px-3">Kelayakan</th>
+                <th class="py-3 px-3">Status Ketersediaan</th>
+                <th class="py-3 px-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyAir" class="divide-y divide-[#6EC1E4]/10">
+              <tr><td colspan="7" class="py-6 text-center text-[#8aa9be]">Memuat data titik air bersih...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: TITIK BANJIR HISTORIS & VALIDASI    -->
+      <!-- ========================================== -->
+      <section id="tabTitikBanjir" class="tab-content hidden space-y-5">
+        
+        <!-- Rekapitulasi Validasi Spasial AHP Card -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="glass-card p-5 md:col-span-2">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-2">
+              <span>📊</span> Statistik Validasi Model Spasial Kerawanan Banjir
+            </h3>
+            <p class="text-xs text-[#8aa9be] mb-3">
+              Titik banjir historis aktual (termasuk kejadian banjir besar Februari 2025 di Legok, Teluk Kenali, dan Danau Sipin) dikorelasikan secara spasial menggunakan <code>ST_Contains</code> PostGIS terhadap poligon zona rawan banjir AHP.
+            </p>
+            <div id="statValidasiBox" class="space-y-2">
+              <div class="text-xs text-[#8aa9be]">Menghitung persentase akurasi model...</div>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>📍</span> Input Kejadian Baru
+              </h3>
+              <p class="text-xs text-[#8aa9be] mt-1">Tambahkan hasil survei lapangan kejadian genangan untuk memperkaya database validasi.</p>
+            </div>
+            <button id="btnOpenModalBanjir" class="btn-accent w-full py-2.5 text-xs mt-4">
+              + Input Titik Banjir Lapangan
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabel Titik Banjir -->
+        <div class="glass-card p-5 overflow-x-auto">
+          <h3 class="text-sm font-bold text-[#6EC1E4] mb-3">Daftar Titik Banjir Historis Terverifikasi</h3>
+          <table class="w-full text-left text-xs text-slate-200">
+            <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-3">Nama Lokasi / RT</th>
+                <th class="py-3 px-3">Kecamatan</th>
+                <th class="py-3 px-3">Tanggal Kejadian</th>
+                <th class="py-3 px-3">Tinggi (cm)</th>
+                <th class="py-3 px-3">Lama (Jam)</th>
+                <th class="py-3 px-3">Keterangan</th>
+                <th class="py-3 px-3">Koordinat</th>
+                <th class="py-3 px-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyBanjir" class="divide-y divide-[#6EC1E4]/10">
+              <tr><td colspan="8" class="py-6 text-center text-[#8aa9be]">Memuat data titik banjir...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 4: RUAS JALAN TERGENANG (F09/LINESTRING)-->
+      <!-- ========================================== -->
+      <section id="tabJalan" class="tab-content hidden space-y-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 glass-card p-5">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>🚧</span> Penandaan Ruas Jalan Tergenang (LineString - F09)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-0.5">Ruas yang ditandai <b>Tergenang</b> secara otomatis dihindari (diberi penalti biaya maksimum / blokir) oleh algoritma navigasi pgRouting agar rute evakuasi warga aman.</p>
+          </div>
+          <button id="btnOpenModalJalan" class="btn-accent px-4 py-2 text-xs flex items-center gap-1.5">
+            <span>+ Tandai Ruas Jalan Baru</span>
+          </button>
+        </div>
+
+        <div class="glass-card p-5 overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-200">
+            <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-3">Nama Ruas Jalan</th>
+                <th class="py-3 px-3">Kecamatan</th>
+                <th class="py-3 px-3">Kedalaman (cm)</th>
+                <th class="py-3 px-3">Status Evakuasi</th>
+                <th class="py-3 px-3">Keterangan</th>
+                <th class="py-3 px-3">Terakhir Update</th>
+                <th class="py-3 px-3 text-right">Aksi & Toggle</th>
+              </tr>
+            </thead>
+            <tbody id="tableBodyJalan" class="divide-y divide-[#6EC1E4]/10">
+              <tr><td colspan="7" class="py-6 text-center text-[#8aa9be]">Memuat data ruas jalan tergenang...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 5: INPUT CURAH HUJAN MANUAL (FALLBACK) -->
+      <!-- ========================================== -->
+      <section id="tabHujanManual" class="tab-content hidden space-y-5">
+        <div class="glass-card p-5">
+          <div class="border-b border-[#6EC1E4]/15 pb-3 mb-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>🌧️</span> Input Curah Hujan Manual (Cadangan / Fallback Sensor)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-1">
+              Gunakan form di bawah untuk memasukkan angka curah hujan manual per kecamatan apabila sensor lapangan atau API eksternal (Open-Meteo) mengalami kendala jaringan.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="listManualKecamatanGrid">
+            <div class="p-4 text-xs text-[#8aa9be] text-center col-span-full">Memuat daftar 11 kecamatan...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 6: AMBANG STATUS & BOBOT MODEL AHP     -->
+      <!-- ========================================== -->
+      <section id="tabAmbangBobot" class="tab-content hidden space-y-6">
+        
+        <!-- Ambang Batas Curah Hujan BMKG -->
+        <div class="glass-card p-5">
+          <div class="border-b border-[#6EC1E4]/15 pb-3 mb-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>⚙️</span> Batas Ambang Curah Hujan BMKG (Waspada & Siaga)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-1">
+              Mengatur batas nilai presipitasi curah hujan per jam untuk memicu eskalasi status peringatan dan pengiriman notifikasi email ke warga.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="containerAmbang">
+            <div class="text-xs text-[#8aa9be]">Memuat pengaturan ambang batas...</div>
+          </div>
+        </div>
+
+        <!-- Bobot Parameter Model AHP 6 Faktor -->
+        <div class="glass-card p-5">
+          <div class="border-b border-[#6EC1E4]/15 pb-3 mb-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>📐</span> Penyesuaian Bobot Parameter Kerawanan (Model AHP 6 Faktor)
+            </h2>
+            <p class="text-xs text-[#8aa9be] mt-1">
+              Sesuai proposal SIRANDU, total bobot faktor pembentuk kerawanan banjir berjumlah 100%. Anda dapat menyempurnakan bobot parameter berdasarkan kalibrasi BPBD.
+            </p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-200">
+              <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-3">Nama Faktor</th>
+                  <th class="py-2.5 px-3">Parameter Model</th>
+                  <th class="py-2.5 px-3">Bobot (%)</th>
+                  <th class="py-2.5 px-3">Keterangan / Variabel</th>
+                  <th class="py-2.5 px-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyBobot" class="divide-y divide-[#6EC1E4]/10">
+                <tr><td colspan="5" class="py-4 text-center text-[#8aa9be]">Memuat data bobot model...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 7: LOG NOTIFIKASI & DATA WARGA         -->
+      <!-- ========================================== -->
+      <section id="tabLogNotif" class="tab-content hidden space-y-6">
+        
+        <!-- Riwayat Email Peringatan Dini Terkirim -->
+        <div class="glass-card p-5">
+          <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
+            <span>📧</span> Riwayat Pengiriman Notifikasi Email Peringatan Dini (F06)
+          </h2>
+          <p class="text-xs text-[#8aa9be] mb-4">Mencatat riwayat otomatis saat scheduler mendeteksi kenaikan status cuaca kecamatan ke tingkat Waspada atau Siaga.</p>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-200">
+              <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-3">Waktu Kirim</th>
+                  <th class="py-2.5 px-3">Wilayah Kecamatan</th>
+                  <th class="py-2.5 px-3">Status Baru</th>
+                  <th class="py-2.5 px-3">Jumlah Penerima</th>
+                  <th class="py-2.5 px-3">Status Pengiriman</th>
+                  <th class="py-2.5 px-3">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyLogNotif" class="divide-y divide-[#6EC1E4]/10">
+                <tr><td colspan="6" class="py-4 text-center text-[#8aa9be]">Memuat log pengiriman...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Daftar Warga Berlangganan -->
+        <div class="glass-card p-5">
+          <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
+            <span>👥</span> Daftar Warga Berlangganan Notifikasi Per Kecamatan
+          </h2>
+          <p class="text-xs text-[#8aa9be] mb-4">Warga Kota Jambi yang mendaftar via landing page / formulir notifikasi.</p>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-200">
+              <thead class="border-b border-[#6EC1E4]/20 text-[#6EC1E4] uppercase text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-3">ID</th>
+                  <th class="py-2.5 px-3">Email Warga</th>
+                  <th class="py-2.5 px-3">Kecamatan Langganan</th>
+                  <th class="py-2.5 px-3">Status Verifikasi</th>
+                  <th class="py-2.5 px-3">Terdaftar Sejak</th>
+                </tr>
+              </thead>
+              <tbody id="tableBodyWarga" class="divide-y divide-[#6EC1E4]/10">
+                <tr><td colspan="5" class="py-4 text-center text-[#8aa9be]">Memuat daftar warga...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL FORMS: TAMBAH / EDIT POSKO, AIR, BANJIR, JALAN    -->
+  <!-- ======================================================== -->
+
+  <!-- Modal Posko -->
+  <div id="modalPosko" class="modal-backdrop hidden">
+    <div class="glass-card max-w-lg w-full p-6 border-[#6EC1E4]/40 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <h3 class="text-base font-bold text-white mb-3" id="modalPoskoTitle">Tambah Posko Pengungsian</h3>
+      <form id="formPosko" class="space-y-3">
+        <input type="hidden" id="poskoId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Posko</label>
+          <input type="text" id="poskoNama" required placeholder="Contoh: GOR Kotabaru Jambi" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kapasitas (Jiwa)</label>
+            <input type="number" id="poskoKapasitas" required value="200" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Terisi (Jiwa)</label>
+            <input type="number" id="poskoTerisi" value="0" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Alamat Lengkap</label>
+          <input type="text" id="poskoAlamat" placeholder="Jl. Basuki Rahmat No. 1..." class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Kontak Narahubung BPBD / Camat</label>
+          <input type="text" id="poskoKontak" placeholder="0812-3456-7890 (Call Center)" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Latitude</label>
+            <input type="text" id="poskoLat" required placeholder="-1.6250" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Longitude</label>
+            <input type="text" id="poskoLng" required placeholder="103.6120" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="poskoStatusAktif" checked class="rounded text-[#6EC1E4]">
+          <label for="poskoStatusAktif" class="text-xs text-slate-200">Status Aktif & Siaga Menerima Warga</label>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-[#6EC1E4]/20">
+          <button type="button" class="btn-ghost px-4 py-2 text-xs" onclick="closeAllModals()">Batal</button>
+          <button type="submit" class="btn-accent px-5 py-2 text-xs">Simpan Posko</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Air Bersih -->
+  <div id="modalAir" class="modal-backdrop hidden">
+    <div class="glass-card max-w-lg w-full p-6 border-[#6EC1E4]/40 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <h3 class="text-base font-bold text-white mb-3" id="modalAirTitle">Tambah Titik Sumber Air Bersih</h3>
+      <form id="formAir" class="space-y-3">
+        <input type="hidden" id="airId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Titik / Instalasi</label>
+          <input type="text" id="airNama" required placeholder="Contoh: Hidran Umum PDAM Danau Sipin" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Pengelola</label>
+            <input type="text" id="airPengelola" value="PDAM Tirta Mayang" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Jenis Layanan</label>
+            <select id="airJenis" class="w-full px-3.5 py-2 text-xs input-dark bg-[#041724]">
+              <option value="Hidran Umum">Hidran Umum</option>
+              <option value="Sumur Bor Dalam">Sumur Bor Dalam</option>
+              <option value="Tangki Air Darurat">Tangki Air Darurat (BPBD)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Jam Operasional</label>
+            <input type="text" id="airJam" value="24 Jam (Darurat)" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Debit (L/detik)</label>
+            <input type="number" id="airDebit" step="0.1" value="2.5" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Latitude</label>
+            <input type="text" id="airLat" required placeholder="-1.6050" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Longitude</label>
+            <input type="text" id="airLng" required placeholder="103.5900" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="airStatusAktif" checked class="rounded text-[#6EC1E4]">
+          <label for="airStatusAktif" class="text-xs text-slate-200">Air Tersedia & Siap Digunakan</label>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-[#6EC1E4]/20">
+          <button type="button" class="btn-ghost px-4 py-2 text-xs" onclick="closeAllModals()">Batal</button>
+          <button type="submit" class="btn-accent px-5 py-2 text-xs">Simpan Titik Air</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Titik Banjir Historis -->
+  <div id="modalBanjir" class="modal-backdrop hidden">
+    <div class="glass-card max-w-lg w-full p-6 border-[#6EC1E4]/40 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <h3 class="text-base font-bold text-white mb-3" id="modalBanjirTitle">Input Titik Banjir Historis (Validasi)</h3>
+      <form id="formBanjir" class="space-y-3">
+        <input type="hidden" id="banjirId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lokasi / RT / Kelurahan</label>
+          <input type="text" id="banjirNama" required placeholder="Contoh: RT 08 Kelurahan Legok" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kecamatan</label>
+            <select id="banjirKecamatan" class="w-full px-3.5 py-2 text-xs input-dark bg-[#041724]">
+              <option value="Danau Sipin">Danau Sipin</option>
+              <option value="Telanaipura">Telanaipura</option>
+              <option value="Pelayangan">Pelayangan</option>
+              <option value="Danau Teluk">Danau Teluk</option>
+              <option value="Jambi Timur">Jambi Timur</option>
+              <option value="Pasar Jambi">Pasar Jambi</option>
+              <option value="Jelutung">Jelutung</option>
+              <option value="Kota Baru">Kota Baru</option>
+              <option value="Alam Barajo">Alam Barajo</option>
+              <option value="Jambi Selatan">Jambi Selatan</option>
+              <option value="Paal Merah">Paal Merah</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tanggal Kejadian</label>
+            <input type="date" id="banjirTanggal" required value="2025-02-15" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tinggi Genangan (cm)</label>
+            <input type="number" id="banjirTinggi" value="65" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Lama Genangan (Jam)</label>
+            <input type="number" id="banjirLama" value="18" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Keterangan / Dampak</label>
+          <input type="text" id="banjirKeterangan" placeholder="Genangan akibat luapan Sungai Batanghari..." class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Latitude</label>
+            <input type="text" id="banjirLat" required placeholder="-1.5950" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Longitude</label>
+            <input type="text" id="banjirLng" required placeholder="103.5880" class="w-full px-3.5 py-2 text-xs input-dark font-mono">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-[#6EC1E4]/20">
+          <button type="button" class="btn-ghost px-4 py-2 text-xs" onclick="closeAllModals()">Batal</button>
+          <button type="submit" class="btn-accent px-5 py-2 text-xs">Simpan Data Banjir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Ruas Jalan Tergenang -->
+  <div id="modalJalan" class="modal-backdrop hidden">
+    <div class="glass-card max-w-lg w-full p-6 border-[#6EC1E4]/40 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <h3 class="text-base font-bold text-white mb-2" id="modalJalanTitle">Tandai Ruas Jalan Tergenang (LineString)</h3>
+      <p class="text-[11px] text-[#8aa9be] mb-3">Masukkan minimal 2 koordinat titik garis [Lng, Lat] awal dan akhir jalan.</p>
+      <form id="formJalan" class="space-y-3">
+        <input type="hidden" id="jalanId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Ruas Jalan</label>
+          <input type="text" id="jalanNama" required placeholder="Contoh: Jl. Slamet Riyadi (Broni - Danau Sipin)" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kecamatan</label>
+            <input type="text" id="jalanKecamatan" value="Danau Sipin" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Kedalaman (cm)</label>
+            <input type="number" id="jalanKedalaman" value="45" class="w-full px-3.5 py-2 text-xs input-dark">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Titik Koordinat Awal (Lng, Lat)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="jalanLng1" required value="103.5850" placeholder="Lng Awal: 103.5850" class="w-full px-3 py-1.5 text-xs input-dark font-mono">
+            <input type="text" id="jalanLat1" required value="-1.5980" placeholder="Lat Awal: -1.5980" class="w-full px-3 py-1.5 text-xs input-dark font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Titik Koordinat Akhir (Lng, Lat)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="jalanLng2" required value="103.5920" placeholder="Lng Akhir: 103.5920" class="w-full px-3 py-1.5 text-xs input-dark font-mono">
+            <input type="text" id="jalanLat2" required value="-1.5960" placeholder="Lat Akhir: -1.5960" class="w-full px-3 py-1.5 text-xs input-dark font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Keterangan Kondisi</label>
+          <input type="text" id="jalanKeterangan" placeholder="Air meluap 45 cm, tidak dapat dilalui motor & sedan" class="w-full px-3.5 py-2 text-xs input-dark">
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="jalanStatusTergenang" checked class="rounded text-[#6EC1E4]">
+          <label for="jalanStatusTergenang" class="text-xs text-rose-300 font-semibold">Tandai Sedang Tergenang (Rute Dialihkan)</label>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-[#6EC1E4]/20">
+          <button type="button" class="btn-ghost px-4 py-2 text-xs" onclick="closeAllModals()">Batal</button>
+          <button type="submit" class="btn-accent px-5 py-2 text-xs">Simpan Ruas Jalan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT DASHBOARD LOGIC (AUTHENTICATION & API CALLS)  -->
+  <!-- ======================================================== -->
+  <script>
+    const API_URL = '/api/admin';
+    let adminToken = localStorage.getItem('sirandu_admin_token') || '';
+
+    // ==========================================
+    // 1. AUTHENTICATION & SESSION MANAGEMENT
+    // ==========================================
+    async function checkAuthSession() {
+      if (!adminToken) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/me`, {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const json = await res.json();
+        if (json.success && json.admin) {
+          showDashboard(json.admin);
+        } else {
+          showLogin();
+        }
+      } catch (e) {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('dashboardScreen').classList.add('hidden');
+    }
+
+    function showDashboard(admin) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboardScreen').classList.remove('hidden');
+      if (admin) {
+        document.getElementById('adminBadgeName').textContent = `${admin.nama_lengkap} (${admin.role})`;
+      }
+      loadTabContent('tabPosko');
+    }
+
+    // Login Form Submit
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      const alertBox = document.getElementById('loginAlert');
+      const btn = document.getElementById('btnLoginSubmit');
+
+      alertBox.classList.add('hidden');
+      btn.innerHTML = '<span>Memverifikasi...</span>';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const json = await res.json();
+
+        if (json.success && json.token) {
+          adminToken = json.token;
+          localStorage.setItem('sirandu_admin_token', adminToken);
+          showDashboard(json.admin);
+        } else {
+          alertBox.textContent = json.message || 'Login gagal, periksa username & password.';
+          alertBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        alertBox.textContent = 'Gagal terhubung ke server: ' + err.message;
+        alertBox.classList.remove('hidden');
+      } finally {
+        btn.innerHTML = '<span>Masuk ke Dashboard</span><span>→</span>';
+        btn.disabled = false;
+      }
+    });
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      localStorage.removeItem('sirandu_admin_token');
+      adminToken = '';
+      showLogin();
+    });
+
+    // ==========================================
+    // 2. TAB SWITCHER
+    // ==========================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+        btn.classList.add('active');
+        const target = btn.getAttribute('data-tab');
+        document.getElementById(target).classList.remove('hidden');
+        loadTabContent(target);
+      });
+    });
+
+    function loadTabContent(tabId) {
+      if (tabId === 'tabPosko') loadPoskoData();
+      else if (tabId === 'tabAir') loadAirData();
+      else if (tabId === 'tabTitikBanjir') loadBanjirData();
+      else if (tabId === 'tabJalan') loadJalanData();
+      else if (tabId === 'tabHujanManual') loadHujanManualData();
+      else if (tabId === 'tabAmbangBobot') { loadAmbangData(); loadBobotData(); }
+      else if (tabId === 'tabLogNotif') { loadLogNotifData(); loadWargaData(); }
+    }
+
+    // Modal helpers
+    function closeAllModals() {
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
+    }
+
+    // ==========================================
+    // 3. TAB 1: POSKO PENGUNGSIAN (F07)
+    // ==========================================
+    async function loadPoskoData() {
+      const tbody = document.getElementById('tableBodyPosko');
+      try {
+        const res = await fetch(`${API_URL}/posko`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        if (json.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-center text-slate-400">Belum ada data posko pengungsian.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = json.data.map(p => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold text-white flex items-center gap-1.5">
+              <span>🏕️</span> ${p.nama}
+            </td>
+            <td class="py-3 px-3 text-slate-300">${p.alamat || '-'}</td>
+            <td class="py-3 px-3">
+              <span class="font-bold text-white">${p.kapasitas}</span>
+              <span class="text-[10px] text-slate-400"> (Terisi: ${p.terisi_jiwa || 0})</span>
+            </td>
+            <td class="py-3 px-3 text-[#6EC1E4]">${p.kontak || '-'}</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-slate-400">${parseFloat(p.lat).toFixed(4)}, ${parseFloat(p.lng).toFixed(4)}</td>
+            <td class="py-3 px-3">
+              <button onclick="togglePoskoStatus(${p.id}, ${!p.status_aktif})" class="badge-status ${p.status_aktif ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-500/20 text-slate-400 border border-slate-500/40'}">
+                ${p.status_aktif ? '● AKTIF' : '○ NON-AKTIF'}
+              </button>
+            </td>
+            <td class="py-3 px-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="editPosko(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="text-[#6EC1E4] hover:underline">Edit</button>
+              <button onclick="deletePosko(${p.id})" class="text-rose-400 hover:underline">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-400">Gagal: ${err.message}</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnOpenModalPosko').addEventListener('click', () => {
+      document.getElementById('poskoId').value = '';
+      document.getElementById('poskoNama').value = '';
+      document.getElementById('poskoKapasitas').value = '200';
+      document.getElementById('poskoTerisi').value = '0';
+      document.getElementById('poskoAlamat').value = '';
+      document.getElementById('poskoKontak').value = '';
+      document.getElementById('poskoLat').value = '-1.6250';
+      document.getElementById('poskoLng').value = '103.6120';
+      document.getElementById('poskoStatusAktif').checked = true;
+      document.getElementById('modalPoskoTitle').textContent = 'Tambah Posko Pengungsian';
+      document.getElementById('modalPosko').classList.remove('hidden');
+    });
+
+    window.editPosko = function(p) {
+      document.getElementById('poskoId').value = p.id;
+      document.getElementById('poskoNama').value = p.nama;
+      document.getElementById('poskoKapasitas').value = p.kapasitas;
+      document.getElementById('poskoTerisi').value = p.terisi_jiwa || 0;
+      document.getElementById('poskoAlamat').value = p.alamat || '';
+      document.getElementById('poskoKontak').value = p.kontak || '';
+      document.getElementById('poskoLat').value = p.lat;
+      document.getElementById('poskoLng').value = p.lng;
+      document.getElementById('poskoStatusAktif').checked = p.status_aktif;
+      document.getElementById('modalPoskoTitle').textContent = 'Edit Posko Pengungsian';
+      document.getElementById('modalPosko').classList.remove('hidden');
+    };
+
+    document.getElementById('formPosko').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('poskoId').value;
+      const payload = {
+        nama: document.getElementById('poskoNama').value,
+        kapasitas: parseInt(document.getElementById('poskoKapasitas').value, 10),
+        terisi_jiwa: parseInt(document.getElementById('poskoTerisi').value, 10),
+        alamat: document.getElementById('poskoAlamat').value,
+        kontak: document.getElementById('poskoKontak').value,
+        latitude: parseFloat(document.getElementById('poskoLat').value),
+        longitude: parseFloat(document.getElementById('poskoLng').value),
+        status_aktif: document.getElementById('poskoStatusAktif').checked
+      };
+
+      const url = id ? `${API_URL}/posko/${id}` : `${API_URL}/posko`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          closeAllModals();
+          loadPoskoData();
+        } else {
+          alert(json.message || 'Gagal menyimpan posko.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    window.togglePoskoStatus = async function(id, newStatus) {
+      try {
+        const res = await fetch(`${API_URL}/posko/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ status_aktif: newStatus })
+        });
+        const json = await res.json();
+        if (json.success) loadPoskoData();
+      } catch (err) {
+        alert('Gagal ubah status posko: ' + err.message);
+      }
+    };
+
+    window.deletePosko = async function(id) {
+      if (!confirm('Yakin ingin menghapus posko ini?')) return;
+      try {
+        const res = await fetch(`${API_URL}/posko/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const json = await res.json();
+        if (json.success) loadPoskoData();
+      } catch (err) {
+        alert('Gagal menghapus: ' + err.message);
+      }
+    };
+
+    // ==========================================
+    // 4. TAB 2: SUMBER AIR BERSIH (F08)
+    // ==========================================
+    async function loadAirData() {
+      const tbody = document.getElementById('tableBodyAir');
+      try {
+        const res = await fetch(`${API_URL}/air-bersih`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        tbody.innerHTML = json.data.map(a => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold text-white flex items-center gap-1.5">
+              <span>💧</span> ${a.nama_lokasi}
+            </td>
+            <td class="py-3 px-3 text-slate-300">${a.pengelola || 'PDAM Tirta Mayang'}</td>
+            <td class="py-3 px-3 text-[#6EC1E4]">${a.jenis || 'Hidran'}</td>
+            <td class="py-3 px-3 text-slate-400">${a.jam_operasional || '24 Jam'}</td>
+            <td class="py-3 px-3">
+              <span class="badge-status ${a.status_layak ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                ${a.status_layak ? 'Layak Konsumsi' : 'Perlu Sterilisasi'}
+              </span>
+            </td>
+            <td class="py-3 px-3">
+              <button onclick="toggleAirStatus(${a.id}, ${!a.status_aktif})" class="badge-status ${a.status_aktif ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-500/20 text-slate-400 border border-slate-500/40'}">
+                ${a.status_aktif ? '● TERSEDIA' : '○ HABIS / NON-AKTIF'}
+              </button>
+            </td>
+            <td class="py-3 px-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="editAir(${JSON.stringify(a).replace(/"/g, '&quot;')})" class="text-[#6EC1E4] hover:underline">Edit</button>
+              <button onclick="deleteAir(${a.id})" class="text-rose-400 hover:underline">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-400">Gagal: ${err.message}</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnOpenModalAir').addEventListener('click', () => {
+      document.getElementById('airId').value = '';
+      document.getElementById('airNama').value = '';
+      document.getElementById('airPengelola').value = 'PDAM Tirta Mayang';
+      document.getElementById('airJenis').value = 'Hidran Umum';
+      document.getElementById('airJam').value = '24 Jam (Darurat)';
+      document.getElementById('airDebit').value = '2.5';
+      document.getElementById('airLat').value = '-1.6050';
+      document.getElementById('airLng').value = '103.5900';
+      document.getElementById('airStatusAktif').checked = true;
+      document.getElementById('modalAirTitle').textContent = 'Tambah Titik Air Bersih';
+      document.getElementById('modalAir').classList.remove('hidden');
+    });
+
+    window.editAir = function(a) {
+      document.getElementById('airId').value = a.id;
+      document.getElementById('airNama').value = a.nama_lokasi;
+      document.getElementById('airPengelola').value = a.pengelola || '';
+      document.getElementById('airJenis').value = a.jenis || 'Hidran Umum';
+      document.getElementById('airJam').value = a.jam_operasional || '';
+      document.getElementById('airDebit').value = a.debit_liter_detik || 2.5;
+      document.getElementById('airLat').value = a.lat;
+      document.getElementById('airLng').value = a.lng;
+      document.getElementById('airStatusAktif').checked = a.status_aktif;
+      document.getElementById('modalAirTitle').textContent = 'Edit Titik Air Bersih';
+      document.getElementById('modalAir').classList.remove('hidden');
+    };
+
+    document.getElementById('formAir').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('airId').value;
+      const payload = {
+        nama_lokasi: document.getElementById('airNama').value,
+        pengelola: document.getElementById('airPengelola').value,
+        jenis: document.getElementById('airJenis').value,
+        jam_operasional: document.getElementById('airJam').value,
+        debit_liter_detik: parseFloat(document.getElementById('airDebit').value),
+        latitude: parseFloat(document.getElementById('airLat').value),
+        longitude: parseFloat(document.getElementById('airLng').value),
+        status_aktif: document.getElementById('airStatusAktif').checked
+      };
+
+      const url = id ? `${API_URL}/air-bersih/${id}` : `${API_URL}/air-bersih`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          closeAllModals();
+          loadAirData();
+        } else {
+          alert(json.message || 'Gagal menyimpan.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    window.toggleAirStatus = async function(id, newStatus) {
+      try {
+        const res = await fetch(`${API_URL}/air-bersih/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ status_aktif: newStatus })
+        });
+        const json = await res.json();
+        if (json.success) loadAirData();
+      } catch (err) {
+        alert('Gagal ubah status: ' + err.message);
+      }
+    };
+
+    window.deleteAir = async function(id) {
+      if (!confirm('Yakin ingin menghapus titik air bersih ini?')) return;
+      try {
+        const res = await fetch(`${API_URL}/air-bersih/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const json = await res.json();
+        if (json.success) loadAirData();
+      } catch (err) {
+        alert('Gagal: ' + err.message);
+      }
+    };
+
+    // ==========================================
+    // 5. TAB 3: TITIK BANJIR HISTORIS & VALIDASI
+    // ==========================================
+    async function loadBanjirData() {
+      const tbody = document.getElementById('tableBodyBanjir');
+      const statBox = document.getElementById('statValidasiBox');
+
+      // 1. Load Statistik Validasi
+      try {
+        const statRes = await fetch(`${API_URL}/titik-banjir/statistik`, {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const statJson = await statRes.json();
+        if (statJson.success && statJson.data) {
+          const s = statJson.data;
+          statBox.innerHTML = `
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-xs text-white">Total Kejadian Banjir Tercatat: <b class="text-xl text-[#6EC1E4]">${s.total_kejadian_tercatat} Titik</b></span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              ${(s.validasi_terhadap_zona_rawan || []).map(z => `
+                <div class="glass-inner p-2 border-white/10">
+                  <div class="text-[10px] text-[#8aa9be]">Zona: <b>${z.zona || 'Lainnya'}</b></div>
+                  <div class="text-sm font-black text-white">${z.jumlah_titik} <span class="text-[10px] font-normal text-[#6EC1E4]">(${z.persentase}%)</span></div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="text-[11px] text-emerald-300 mt-2 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+              ✓ ${s.kesimpulan_akurasi}
+            </div>
+          `;
+        }
+      } catch (e) {
+        statBox.innerHTML = '<span class="text-xs text-rose-400">Gagal memuat statistik akurasi.</span>';
+      }
+
+      // 2. Load Tabel Titik Banjir
+      try {
+        const res = await fetch(`${API_URL}/titik-banjir`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        tbody.innerHTML = json.data.map(b => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold text-white flex items-center gap-1.5">
+              <span>📍</span> ${b.nama_lokasi}
+            </td>
+            <td class="py-3 px-3 text-[#6EC1E4]">${b.kecamatan}</td>
+            <td class="py-3 px-3 text-slate-300 font-mono">${b.tanggal_kejadian ? b.tanggal_kejadian.split('T')[0] : '-'}</td>
+            <td class="py-3 px-3 font-bold text-rose-300">${b.tinggi_genangan_cm || 0} cm</td>
+            <td class="py-3 px-3 text-slate-400">${b.lama_genangan_jam || 0} Jam</td>
+            <td class="py-3 px-3 text-slate-300">${b.keterangan || '-'}</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-slate-400">${parseFloat(b.lat).toFixed(4)}, ${parseFloat(b.lng).toFixed(4)}</td>
+            <td class="py-3 px-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="editBanjir(${JSON.stringify(b).replace(/"/g, '&quot;')})" class="text-[#6EC1E4] hover:underline">Edit</button>
+              <button onclick="deleteBanjir(${b.id})" class="text-rose-400 hover:underline">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-rose-400">Gagal: ${err.message}</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnOpenModalBanjir').addEventListener('click', () => {
+      document.getElementById('banjirId').value = '';
+      document.getElementById('banjirNama').value = '';
+      document.getElementById('banjirKecamatan').value = 'Danau Sipin';
+      document.getElementById('banjirTanggal').value = '2025-02-15';
+      document.getElementById('banjirTinggi').value = '65';
+      document.getElementById('banjirLama').value = '18';
+      document.getElementById('banjirKeterangan').value = '';
+      document.getElementById('banjirLat').value = '-1.5950';
+      document.getElementById('banjirLng').value = '103.5880';
+      document.getElementById('modalBanjirTitle').textContent = 'Input Titik Banjir Lapangan';
+      document.getElementById('modalBanjir').classList.remove('hidden');
+    });
+
+    window.editBanjir = function(b) {
+      document.getElementById('banjirId').value = b.id;
+      document.getElementById('banjirNama').value = b.nama_lokasi;
+      document.getElementById('banjirKecamatan').value = b.kecamatan;
+      document.getElementById('banjirTanggal').value = b.tanggal_kejadian ? b.tanggal_kejadian.split('T')[0] : '2025-02-15';
+      document.getElementById('banjirTinggi').value = b.tinggi_genangan_cm || 50;
+      document.getElementById('banjirLama').value = b.lama_genangan_jam || 12;
+      document.getElementById('banjirKeterangan').value = b.keterangan || '';
+      document.getElementById('banjirLat').value = b.lat;
+      document.getElementById('banjirLng').value = b.lng;
+      document.getElementById('modalBanjirTitle').textContent = 'Edit Titik Banjir Historis';
+      document.getElementById('modalBanjir').classList.remove('hidden');
+    };
+
+    document.getElementById('formBanjir').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('banjirId').value;
+      const payload = {
+        nama_lokasi: document.getElementById('banjirNama').value,
+        kecamatan: document.getElementById('banjirKecamatan').value,
+        tanggal_kejadian: document.getElementById('banjirTanggal').value,
+        tinggi_genangan_cm: parseInt(document.getElementById('banjirTinggi').value, 10),
+        lama_genangan_jam: parseInt(document.getElementById('banjirLama').value, 10),
+        keterangan: document.getElementById('banjirKeterangan').value,
+        latitude: parseFloat(document.getElementById('banjirLat').value),
+        longitude: parseFloat(document.getElementById('banjirLng').value)
+      };
+
+      const url = id ? `${API_URL}/titik-banjir/${id}` : `${API_URL}/titik-banjir`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          closeAllModals();
+          loadBanjirData();
+        } else {
+          alert(json.message || 'Gagal menyimpan.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    window.deleteBanjir = async function(id) {
+      if (!confirm('Yakin ingin menghapus titik banjir ini?')) return;
+      try {
+        const res = await fetch(`${API_URL}/titik-banjir/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const json = await res.json();
+        if (json.success) loadBanjirData();
+      } catch (err) {
+        alert('Gagal: ' + err.message);
+      }
+    };
+
+    // ==========================================
+    // 6. TAB 4: RUAS JALAN TERGENANG (F09)
+    // ==========================================
+    async function loadJalanData() {
+      const tbody = document.getElementById('tableBodyJalan');
+      try {
+        const res = await fetch(`${API_URL}/jalan-tergenang`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        tbody.innerHTML = json.data.map(j => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold text-white flex items-center gap-1.5">
+              <span>🚧</span> ${j.nama_jalan}
+            </td>
+            <td class="py-3 px-3 text-[#6EC1E4]">${j.kecamatan || 'Kota Jambi'}</td>
+            <td class="py-3 px-3 font-bold text-rose-300">${j.kedalaman_genangan_cm || 0} cm</td>
+            <td class="py-3 px-3">
+              <span class="badge-status ${j.status_tergenang ? 'bg-rose-500/25 text-rose-300 border border-rose-500/50' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'}">
+                ${j.status_tergenang ? '⚠️ TERENDAM / BLOKIR' : '✓ SURUT (DAPAT DILALUI)'}
+              </span>
+            </td>
+            <td class="py-3 px-3 text-slate-300">${j.keterangan || '-'}</td>
+            <td class="py-3 px-3 text-slate-400 font-mono text-[10px]">${j.updated_at ? j.updated_at.split('T')[0] : '-'}</td>
+            <td class="py-3 px-3 text-right space-x-1.5 whitespace-nowrap">
+              <button onclick="toggleJalanStatus(${j.id}, ${!j.status_tergenang})" class="text-xs px-2.5 py-1 rounded-full ${j.status_tergenang ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/40' : 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/40'} border border-white/10 font-bold">
+                ${j.status_tergenang ? 'Tandai Surut' : 'Tandai Terendam'}
+              </button>
+              <button onclick="deleteJalan(${j.id})" class="text-rose-400 hover:underline">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-400">Gagal: ${err.message}</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnOpenModalJalan').addEventListener('click', () => {
+      document.getElementById('jalanNama').value = '';
+      document.getElementById('jalanKecamatan').value = 'Danau Sipin';
+      document.getElementById('jalanKedalaman').value = '45';
+      document.getElementById('jalanLng1').value = '103.5850';
+      document.getElementById('jalanLat1').value = '-1.5980';
+      document.getElementById('jalanLng2').value = '103.5920';
+      document.getElementById('jalanLat2').value = '-1.5960';
+      document.getElementById('jalanKeterangan').value = '';
+      document.getElementById('jalanStatusTergenang').checked = true;
+      document.getElementById('modalJalan').classList.remove('hidden');
+    });
+
+    document.getElementById('formJalan').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const coords = [
+        [parseFloat(document.getElementById('jalanLng1').value), parseFloat(document.getElementById('jalanLat1').value)],
+        [parseFloat(document.getElementById('jalanLng2').value), parseFloat(document.getElementById('jalanLat2').value)]
+      ];
+
+      const payload = {
+        nama_jalan: document.getElementById('jalanNama').value,
+        kecamatan: document.getElementById('jalanKecamatan').value,
+        kedalaman_genangan_cm: parseInt(document.getElementById('jalanKedalaman').value, 10),
+        keterangan: document.getElementById('jalanKeterangan').value,
+        status_tergenang: document.getElementById('jalanStatusTergenang').checked,
+        coordinates: coords
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/jalan-tergenang`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          closeAllModals();
+          loadJalanData();
+        } else {
+          alert(json.message || 'Gagal menandai jalan.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    window.toggleJalanStatus = async function(id, newStatus) {
+      try {
+        const res = await fetch(`${API_URL}/jalan-tergenang/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ status_tergenang: newStatus })
+        });
+        const json = await res.json();
+        if (json.success) loadJalanData();
+      } catch (err) {
+        alert('Gagal: ' + err.message);
+      }
+    };
+
+    window.deleteJalan = async function(id) {
+      if (!confirm('Yakin ingin menghapus ruas jalan ini?')) return;
+      try {
+        const res = await fetch(`${API_URL}/jalan-tergenang/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const json = await res.json();
+        if (json.success) loadJalanData();
+      } catch (err) {
+        alert('Gagal: ' + err.message);
+      }
+    };
+
+    // ==========================================
+    // 7. TAB 5: INPUT CURAH HUJAN MANUAL
+    // ==========================================
+    async function loadHujanManualData() {
+      const grid = document.getElementById('listManualKecamatanGrid');
+      try {
+        const res = await fetch(`${API_URL}/kecamatan-list`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        grid.innerHTML = json.data.map(k => `
+          <div class="glass-inner p-4 border-[#6EC1E4]/20 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-[#6EC1E4]/15 pb-1.5">
+              <span class="font-bold text-white text-sm">${k.nama_kecamatan}</span>
+              <span class="badge-status ${k.status_peringatan === 'Siaga' ? 'bg-rose-500/25 text-rose-300' : k.status_peringatan === 'Waspada' ? 'bg-amber-500/25 text-amber-300' : 'bg-emerald-500/25 text-emerald-300'}">
+                ${k.status_peringatan}
+              </span>
+            </div>
+
+            <div class="text-[11px] text-[#8aa9be] space-y-0.5">
+              <div>Saat Ini: <b class="text-white">${k.curah_hujan_terkini} mm/jam</b> (${k.intensitas_terkini})</div>
+              <div>Sumber: <span class="text-slate-300">${k.sumber_data}</span></div>
+            </div>
+
+            <!-- Form input cepat -->
+            <div class="space-y-2 pt-2 border-t border-white/5">
+              <div class="flex items-center gap-2">
+                <input type="number" step="0.1" id="manualHujan_${k.id}" value="${parseFloat(k.curah_hujan_terkini) || 0}" class="w-1/2 px-2.5 py-1 text-xs input-dark" placeholder="mm/jam">
+                <select id="manualStatus_${k.id}" class="w-1/2 px-2 py-1 text-xs input-dark bg-[#041724]">
+                  <option value="Normal" ${k.status_peringatan === 'Normal' ? 'selected' : ''}>Normal</option>
+                  <option value="Waspada" ${k.status_peringatan === 'Waspada' ? 'selected' : ''}>Waspada</option>
+                  <option value="Siaga" ${k.status_peringatan === 'Siaga' ? 'selected' : ''}>Siaga</option>
+                </select>
+              </div>
+              <button onclick="saveHujanManual(${k.id})" class="btn-accent w-full py-1.5 text-xs">
+                Simpan Curah Hujan Manual
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        grid.innerHTML = `<div class="p-4 text-rose-400 col-span-full">Gagal: ${err.message}</div>`;
+      }
+    }
+
+    window.saveHujanManual = async function(id) {
+      const mm = document.getElementById(`manualHujan_${id}`).value;
+      const status = document.getElementById(`manualStatus_${id}`).value;
+
+      try {
+        const res = await fetch(`${API_URL}/curah-hujan-manual`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ id_kecamatan: id, curah_hujan: parseFloat(mm), status_peringatan: status })
+        });
+        const json = await res.json();
+        alert(json.message || 'Tersimpan.');
+        loadHujanManualData();
+      } catch (err) {
+        alert('Gagal simpan: ' + err.message);
+      }
+    };
+
+    // ==========================================
+    // 8. TAB 6: AMBANG STATUS & BOBOT MODEL
+    // ==========================================
+    async function loadAmbangData() {
+      const container = document.getElementById('containerAmbang');
+      try {
+        const res = await fetch(`${API_URL}/pengaturan-ambang`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        container.innerHTML = json.data.map(a => `
+          <div class="glass-inner p-4 space-y-3">
+            <div class="font-bold text-white text-sm flex items-center justify-between">
+              <span>${a.parameter}</span>
+              <span class="text-xs text-[#6EC1E4]">${a.satuan}</span>
+            </div>
+            <p class="text-xs text-[#8aa9be]">${a.deskripsi}</p>
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-[11px] text-amber-300 font-semibold mb-1">Ambang Waspada</label>
+                <input type="number" step="0.1" id="ambangWaspada_${a.id}" value="${a.ambang_waspada}" class="w-full px-3 py-1.5 text-xs input-dark">
+              </div>
+              <div>
+                <label class="block text-[11px] text-rose-300 font-semibold mb-1">Ambang Siaga</label>
+                <input type="number" step="0.1" id="ambangSiaga_${a.id}" value="${a.ambang_siaga}" class="w-full px-3 py-1.5 text-xs input-dark">
+              </div>
+            </div>
+            <button onclick="saveAmbang(${a.id})" class="btn-accent w-full py-1.5 text-xs mt-2">
+              Update Batas Ambang
+            </button>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = '<span class="text-rose-400">Gagal memuat ambang batas.</span>';
+      }
+    }
+
+    window.saveAmbang = async function(id) {
+      const w = document.getElementById(`ambangWaspada_${id}`).value;
+      const s = document.getElementById(`ambangSiaga_${id}`).value;
+      try {
+        const res = await fetch(`${API_URL}/pengaturan-ambang/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ ambang_waspada: parseFloat(w), ambang_siaga: parseFloat(s) })
+        });
+        const json = await res.json();
+        alert(json.message || 'Ambang diperbarui.');
+        loadAmbangData();
+      } catch (err) {
+        alert('Gagal: ' + err.message);
+      }
+    };
+
+    async function loadBobotData() {
+      const tbody = document.getElementById('tableBodyBobot');
+      try {
+        const res = await fetch(`${API_URL}/bobot-model`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        tbody.innerHTML = json.data.map(b => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-3 px-3 font-bold text-white">${b.nama_faktor}</td>
+            <td class="py-3 px-3 font-mono text-[11px] text-[#6EC1E4]">${b.parameter}</td>
+            <td class="py-3 px-3">
+              <input type="number" step="0.1" id="bobotVal_${b.id}" value="${b.bobot_persen}" class="w-20 px-2 py-1 text-xs input-dark font-bold text-white"> %
+            </td>
+            <td class="py-3 px-3 text-slate-300 text-xs">${b.keterangan || '-'}</td>
+            <td class="py-3 px-3 text-right">
+              <button onclick="saveBobot(${b.id})" class="btn-accent px-3 py-1 text-[11px]">
+                Simpan
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-center text-rose-400">Gagal memuat bobot model.</td></tr>';
+      }
+    }
+
+    window.saveBobot = async function(id) {
+      const val = document.getElementById(`bobotVal_${id}`).value;
+      try {
+        const res = await fetch(`${API_URL}/bobot-model/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ bobot_persen: parseFloat(val) })
+        });
+        const json = await res.json();
+        alert(json.message || 'Bobot diperbarui.');
+        loadBobotData();
+      } catch (e) {
+        alert('Gagal: ' + e.message);
+      }
+    };
+
+    // ==========================================
+    // 9. TAB 7: LOG NOTIFIKASI & WARGA
+    // ==========================================
+    async function loadLogNotifData() {
+      const tbody = document.getElementById('tableBodyLogNotif');
+      try {
+        const res = await fetch(`${API_URL}/log-notifikasi`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        if (json.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400">Belum ada riwayat email terkirim.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = json.data.map(l => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">${l.waktu ? l.waktu.replace('T', ' ').substring(0, 19) : '-'}</td>
+            <td class="py-2.5 px-3 font-bold text-white">${l.nama_kecamatan || `Kec. ID #${l.id_kecamatan}`}</td>
+            <td class="py-2.5 px-3">
+              <span class="badge-status ${l.status_baru === 'Siaga' ? 'bg-rose-500/25 text-rose-300' : 'bg-amber-500/25 text-amber-300'}">
+                ${l.status_baru}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-[#6EC1E4] font-bold">${l.jumlah_terkirim} Email</td>
+            <td class="py-2.5 px-3 text-emerald-400 font-semibold">${l.status_pengiriman || 'Sukses'}</td>
+            <td class="py-2.5 px-3 text-slate-400 text-xs">${l.keterangan || '-'}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-rose-400">Gagal: ${e.message}</td></tr>`;
+      }
+    }
+
+    async function loadWargaData() {
+      const tbody = document.getElementById('tableBodyWarga');
+      try {
+        const res = await fetch(`${API_URL}/pelanggan-notifikasi`, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        if (json.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Belum ada warga yang berlangganan.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = json.data.map(w => `
+          <tr class="hover:bg-white/5 transition">
+            <td class="py-2.5 px-3 font-mono text-slate-400">#${w.id}</td>
+            <td class="py-2.5 px-3 font-bold text-white">${w.email}</td>
+            <td class="py-2.5 px-3 text-[#6EC1E4]">${w.nama_kecamatan || `Kec. #${w.id_kecamatan}`}</td>
+            <td class="py-2.5 px-3">
+              <span class="badge-status ${w.is_verified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                ${w.is_verified ? 'Terverifikasi' : 'Menunggu Verifikasi'}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">${w.created_at ? w.created_at.split('T')[0] : '-'}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-400">Gagal: ${e.message}</td></tr>`;
+      }
+    }
+
+    // Inisialisasi Auth Check saat Halaman Dimuat
+    checkAuthSession();
+  </script>
+</body>
+</html>
