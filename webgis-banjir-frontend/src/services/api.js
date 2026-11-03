@@ -1,5 +1,5 @@
 // API Client Service untuk SIRANDU (WebGIS Banjir Kota Jambi)
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Mengambil ringkasan dan data status cuaca 11 kecamatan terkini (Open-Meteo)
