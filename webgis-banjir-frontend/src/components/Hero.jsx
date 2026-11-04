@@ -68,6 +68,7 @@ export default function Hero() {
     <div className="hero-wrap">
       <div className={`hero${ready ? ' ready' : ''}`} ref={heroRef}>
         <div className="hero-bg" aria-hidden="true" style={{ backgroundImage: `url(${heroImg})` }} />
+        <div className="hero-veil" aria-hidden="true" />
         <canvas ref={canvasRef} id="rain" aria-hidden="true" />
         <div className="glow" />
         <div className="guides">{Array.from({ length: 6 }, (_, i) => <span key={i} />)}</div>

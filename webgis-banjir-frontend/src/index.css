@@ -705,3 +705,19 @@ button.btn{border:0}
 .tc-meta{display:block;font-size:12.5px;letter-spacing:.04em;color:rgba(255,255,255,.55);margin:-10px 0 16px}
 .rc .thl{paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;font-weight:600}
 .mrow .big.empty{opacity:.28}
+
+/* ---- Pembuka hero: layar gelap memudar perlahan, foto fokus dari buram, lalu teks muncul berurutan ---- */
+.hero-veil{position:absolute;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at 50% 60%,#0a2f49 0%,#04141f 70%);animation:veil 2.8s .1s cubic-bezier(.45,0,.2,1) forwards}
+@keyframes veil{0%{opacity:1}70%{opacity:.25}100%{opacity:0;visibility:hidden}}
+.hero-bg{animation:kb 22s ease-in-out infinite alternate,bgin 3s cubic-bezier(.2,.7,.2,1) both}
+@keyframes bgin{from{filter:blur(22px) saturate(.4) brightness(.55)}to{filter:blur(0) saturate(.95) brightness(1) contrast(1.02)}}
+.hero-in{z-index:3}
+.eyebrow{animation:fade 1.2s 1s forwards}
+.hero h1 .w{animation-duration:1.4s;animation-delay:calc(1.05s + var(--wi)*.14s)}
+.hero p{animation:fade 1.4s 2s forwards}
+.hero .right{animation:rise 1.3s 2.2s cubic-bezier(.2,.7,.2,1) both}
+.scroll-hint{animation-delay:2.4s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.nav{animation:navin 1.4s 1.6s both}
+@keyframes navin{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.hero-veil{display:none}.hero-bg,.nav{animation:none!important}}

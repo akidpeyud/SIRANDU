@@ -39,7 +39,7 @@ const ICONS = { posko: dot('posko'), air: dot('air'), banjir: dot('banjir'), me:
 
 function Fit({ geo }) {
   const map = useMap(); const done = useRef(false)
-  useEffect(() => { if (geo && !done.current) { try { const b = L.geoJSON(geo).getBounds(); if (b.isValid()) { map.fitBounds(b, window.innerWidth > 900 ? { paddingTopLeft: [470, 96], paddingBottomRight: [350, 150], maxZoom: 14 } : { paddingTopLeft: [16, 250], paddingBottomRight: [16, 280] }); done.current = true } } catch { /* abaikan */ } } }, [geo, map])
+  useEffect(() => { if (geo && !done.current) { try { const b = L.geoJSON(geo).getBounds(); if (b.isValid()) { map.fitBounds(b, window.innerWidth > 900 ? { paddingTopLeft: [390, 92], paddingBottomRight: [340, 120], maxZoom: 14 } : { paddingTopLeft: [16, 300], paddingBottomRight: [16, 270] }); done.current = true } } catch { /* abaikan */ } } }, [geo, map])
   return null
 }
 function Picker({ onPick }) { useMapEvents({ click: (e) => onPick(+e.latlng.lat.toFixed(6), +e.latlng.lng.toFixed(6)) }); return null }
@@ -200,12 +200,17 @@ export default function WebgisMap() {
   const siaga = cuacaData.filter((k) => k.status_peringatan === 'Siaga').length
   const waspada = cuacaData.filter((k) => k.status_peringatan === 'Waspada').length
   const normal = cuacaData.length - siaga - waspada
+  const legend = useMemo(() => {
+    const m = new Map()
+    ;(data.zona?.features || []).forEach((f) => { const k = f.properties?.kelas_kerawanan; if (k && !m.has(k)) m.set(k, f.properties.warna_hex || '#f97316') })
+    return [...m]
+  }, [data.zona])
   const maxRain = Math.max(12, ...cuacaData.map((k) => +k.curah_hujan_terkini || 0))
 
   return (
     <div ref={root} className={`gm gm-${base}${drawer ? ' drawer-on' : ''}`}>
       <div className="gm-mapwrap">
-        <MapContainer center={CENTER} zoom={12} className="gm-map" zoomControl={false}>
+        <MapContainer center={CENTER} zoom={12} zoomSnap={0.25} zoomDelta={0.5} className="gm-map" zoomControl={false}>
           <ZoomControl position="bottomright" />
           <TileLayer key={base} attribution={bm.attr} url={bm.url} subdomains={bm.sub} maxNativeZoom={bm.native} maxZoom={19} />
           <Fit geo={data._fit} />
@@ -331,13 +336,19 @@ export default function WebgisMap() {
             return (
               <li key={k.id}><button type="button" onClick={() => setKec(k.nama_kecamatan)} className={kec === k.nama_kecamatan ? 'on' : ''} style={{ '--c': stColor(k.status_peringatan) }}>
                 <span className="n"><i />{k.nama_kecamatan}</span>
-                <span className="bar"><u style={{ width: `${Math.max(3, (v / maxRain) * 100)}%` }} /></span>
+                <span className="gm-rb"><u style={{ width: `${Math.max(3, (v / maxRain) * 100)}%` }} /></span>
                 <em>{k.curah_hujan_terkini ?? '–'}</em>
               </button></li>
             )
           })}
         </ul>
       </aside>
+
+      {on.zona && legend.length > 0 && (
+        <div className="gm-leg gm-in" aria-label="Legenda zona rawan banjir">
+          <b>Kerawanan</b>{legend.map(([k, c]) => <span key={k} style={{ '--c': c }}><i />{k}</span>)}
+        </div>
+      )}
 
       {/* Dock layer */}
       <nav className="gm-dock gm-in" aria-label="Layer peta">
