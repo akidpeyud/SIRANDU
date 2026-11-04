@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import BlurText from '../lib/BlurText.jsx'
 import { FEATURES } from '../data/content.js'
+import { useWebgis } from '../context/WebgisContext.jsx'
 import { BACKGROUNDS } from './FeatureBackgrounds.jsx'
 import { gsap, prefersReducedMotion } from '../lib/motion.jsx'
 import { useGSAP } from '../lib/useGSAP.js'
-import { useWebgis } from '../context/WebgisContext.jsx'
 
 /** Kartu accordion: satu kartu melebar, lainnya menyempit dengan judul vertikal. */
 export default function Features() {
@@ -26,16 +26,6 @@ export default function Features() {
     if (to !== null) { e.preventDefault(); setOpen(to); accRef.current.children[to].focus() }
   }
 
-  const handleLinkClick = (e, link) => {
-    if (link === 'Atur notifikasi') {
-      const el = document.getElementById('mulai')
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-      return
-    }
-    e.preventDefault()
-    openMap()
-  }
-
   return (
     <section id="fitur" className="feat">
       <div className="wrap">
@@ -54,14 +44,7 @@ export default function Features() {
                 <div className="body">
                   <h3>{f.title}</h3>
                   <p>{f.desc}</p>
-                  <button 
-                    type="button"
-                    className="pl" 
-                    onClick={(e) => handleLinkClick(e, f.link)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
-                  >
-                    <span>{f.link}</span><i>↗</i>
-                  </button>
+                  <a className="pl" href={f.goto || '#peta'} onClick={(e) => { if (!f.goto) { e.preventDefault(); openMap({ layers: f.layers }) } }}><span>{f.link}</span><i>↗</i></a>
                   <small>DI DALAM FITUR</small>
                   <div className="chips">{f.chips.map((c) => <span key={c}>{c}</span>)}</div>
                 </div>

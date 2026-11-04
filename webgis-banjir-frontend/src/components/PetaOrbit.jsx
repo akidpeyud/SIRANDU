@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import BlurText from '../lib/BlurText.jsx'
-import { RING_INFO } from '../data/content.js'
-import { prefersReducedMotion } from '../lib/motion.jsx'
 import { useWebgis } from '../context/WebgisContext.jsx'
+import { RING_INFO as RING_BASE } from '../data/content.js'
+import { prefersReducedMotion } from '../lib/motion.jsx'
 
 const RINGS = [[170, 105], [300, 185], [440, 265]]
 const ROT = (-6 * Math.PI) / 180
@@ -12,11 +12,12 @@ const NODES = [
 ]
 const FAR = [[60, 430], [930, 90], [940, 590], [210, 60]]
 const ANCHORS = [0, 3, 4, 6]
+const CHIP_RING = { 'Posko pengungsian': 0, 'Kelas curah hujan': 1, 'Titik air bersih': 2, 'Jalan tergenang': 3 }
 const CHIPS = [
   { r: 0, n: '12', t: 'Posko pengungsian', left: '22%', top: '20%' },
   { r: 1, n: '5', t: 'Kelas curah hujan', left: '56%', top: '26%' },
   { r: 2, n: '20+', t: 'Titik air bersih', left: '70%', top: '80%' },
-  { r: 0, n: '8', t: 'Jalur evakuasi', left: '88%', top: '56%' },
+  { r: 0, n: '8', t: 'Jalan tergenang', left: '88%', top: '56%' },
 ]
 
 const pos = (ri, t) => {
@@ -25,7 +26,6 @@ const pos = (ri, t) => {
 }
 
 export default function PetaOrbit() {
-  const { openMap } = useWebgis()
   const secRef = useRef(null), stageRef = useRef(null), orbRef = useRef(null), dustRef = useRef(null)
   const nodeEls = useRef([]), linkEls = useRef([])
   const [seen, setSeen] = useState(false)
@@ -88,6 +88,9 @@ export default function PetaOrbit() {
   }, [])
 
   const ringOn = Math.min(cur, 2)
+  const { openMap, ringkasan, counts } = useWebgis()
+  const nums = [counts.posko, ringkasan ? 5 : null, counts.airBersih, counts.jalanTergenang]
+  const RING_INFO = RING_BASE.map((r, i) => ({ ...r, n: nums[i] == null ? '–' : String(nums[i]) }))
   const info = RING_INFO[cur]
 
   return (
@@ -97,17 +100,7 @@ export default function PetaOrbit() {
           <span className="tag rv">Peta Kota Jambi</span>
           <BlurText as="h2">Satu peta, empat lapis perlindungan untuk warga Jambi.</BlurText>
           <p className="lead rv">Dari titik rumah Anda, SIRANDU menghubungkan zona risiko, posko, jalur evakuasi, dan sumber air bersih di sekitar Sungai Batanghari.</p>
-          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginTop: '16px', flexWrap: 'wrap' }}>
-            <button 
-              type="button" 
-              onClick={() => openMap()}
-              className="btn pri rv"
-              style={{ cursor: 'pointer', border: 'none' }}
-            >
-              Buka Peta Interaktif SIRANDU (5 Layer) 🗺️
-            </button>
-            <a className="net-link rv" href="#fitur">Lihat semua fitur ↗</a>
-          </div>
+          <div className="net-cta"><button type="button" className="btn pri rv" onClick={() => openMap()}>Buka peta interaktif <span className="arr">→</span></button><a className="net-link rv" href="#fitur">Lihat semua fitur ↗</a></div>
         </div>
       </div>
 
@@ -129,26 +122,11 @@ export default function PetaOrbit() {
             {FAR.map((f, i) => <circle key={`f${i}`} cx={f[0]} cy={f[1]} r="4" fill="#6EC1E4" />)}
           </g>
         </svg>
-        <div 
-          className="core" 
-          aria-label="SIRANDU" 
-          onClick={() => openMap()}
-          style={{ cursor: 'pointer' }}
-          title="Klik untuk Buka WebGIS Interaktif"
-        >
+        <div className="core" aria-label="SIRANDU">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0B3C5D" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c3 4.2 6 7 6 10.5a6 6 0 0 1-12 0C6 10 9 7.2 12 3z" /></svg>
         </div>
         {CHIPS.map((c) => (
-          <div 
-            key={c.t} 
-            className={`chip${c.r === ringOn ? ' on' : ''}`} 
-            style={{ left: c.left, top: c.top, cursor: 'pointer' }}
-            onClick={() => openMap()}
-            title="Klik untuk membuka peta tematik"
-          >
-            <b>{c.n}</b>
-            <span>{c.t}</span>
-          </div>
+          <div key={c.t} className={`chip${c.r === ringOn ? ' on' : ''}`} style={{ left: c.left, top: c.top }}><b>{RING_INFO[CHIP_RING[c.t]].n}</b><span>{c.t}</span></div>
         ))}
       </div>
 
@@ -164,7 +142,7 @@ export default function PetaOrbit() {
         </div>
         <div className="ring-desc">
           <div><small>{info.kicker}</small><p>{info.text}</p></div>
-          <small>DATA REAL-TIME POSTGIS &amp; OPEN-METEO</small>
+          <small>ANGKA &amp; PETA = ILUSTRASI</small>
         </div>
       </div>
     </section>

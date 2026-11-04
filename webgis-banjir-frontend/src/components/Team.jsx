@@ -1,6 +1,11 @@
 import { Fragment, useEffect, useRef } from 'react'
 import BlurText from '../lib/BlurText.jsx'
 import { TEAM } from '../data/content.js'
+import aria from '../assets/team-aria.jpg'
+import asril from '../assets/team-asril.jpg'
+import dika from '../assets/team-dika.jpg'
+
+const PHOTOS = { aria, asril, dika }
 import { gsap, prefersReducedMotion } from '../lib/motion.jsx'
 import { useGSAP } from '../lib/useGSAP.js'
 
@@ -61,9 +66,10 @@ function TeamCard({ m, i }) {
             <div className="tc-top"><span className="tc-idx">{m.idx}</span><span className="tc-role">{m.role}</span></div>
             <h3 className="tc-name" ref={nm}>{m.name.map((n, k) => <Fragment key={k}>{k > 0 && <br />}{n}</Fragment>)}</h3>
             <em className="tc-sub">{m.sub}</em>
+            {(m.nim || m.kampus) && <span className="tc-meta">{[m.nim && `NIM ${m.nim}`, m.kampus].filter(Boolean).join(' · ')}</span>}
             <p>{m.bio}</p>
           </div>
-          <div className="ph"><div className="ph-ring" /><div className="ph-in"><Silhouette id={i} /></div></div>
+          <div className="ph"><div className="ph-ring" /><div className="ph-in">{PHOTOS[m.photo] ? <img className="ph-img" src={PHOTOS[m.photo]} alt={`Foto ${m.name.join(' ')}, ${m.role}`} style={{ objectPosition: m.pos }} loading="lazy" /> : <Silhouette id={i} />}</div></div>
         </div>
         <div className="tc-ft"><div className="chips">{m.tags.map((t) => <span key={t}>{t}</span>)}</div><Social /></div>
       </div>

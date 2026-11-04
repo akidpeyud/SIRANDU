@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import BlurText from '../lib/BlurText.jsx'
+import { useWebgis } from '../context/WebgisContext.jsx'
 import { gsap, prefersReducedMotion } from '../lib/motion.jsx'
 import { useGSAP } from '../lib/useGSAP.js'
-import { useWebgis } from '../context/WebgisContext.jsx'
 
 const ICONS = [
   <path key="a" d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" />,
@@ -19,6 +19,7 @@ function Count({ to }) {
   const [v, setV] = useState(0)
   useEffect(() => {
     const el = ref.current
+    if (!el || to == null) return
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) return
       io.disconnect()
@@ -29,25 +30,23 @@ function Count({ to }) {
     io.observe(el)
     return () => io.disconnect()
   }, [to])
-  return <span ref={ref}>{v}</span>
+  return <span ref={ref}>{to == null ? '–' : v}</span>
 }
 
 export default function Proof() {
-  const { ringkasan } = useWebgis()
   const logosRef = useRef(null)
+  const { ringkasan, counts, errorCuaca } = useWebgis()
+  const METRICS = [
+    { n: ringkasan?.total_kecamatan ?? null, suffix: ' kec', title: 'Pemantauan hujan', sub: 'Open-Meteo, diperbarui tiap jam' },
+    { n: counts.posko, suffix: '', title: 'Posko pengungsian', sub: 'Terpetakan di Kota Jambi' },
+    { n: counts.airBersih, suffix: '', title: 'Titik air bersih', sub: 'Sumur, hidran & tangki' },
+    { n: counts.jalanTergenang, suffix: '', title: 'Jalan tergenang terpantau', sub: 'Dipakai untuk menghindari rute banjir' },
+  ]
   useGSAP(() => {
     if (prefersReducedMotion()) return
     const t = gsap.to(logosRef.current, { y: -24, ease: 'none', scrollTrigger: { trigger: '.proof', start: 'top bottom', end: 'bottom top', scrub: true } })
     return () => { t.scrollTrigger?.kill(); t.kill() }
   }, [])
-
-  const dynamicMetrics = [
-    { n: ringkasan?.total_kecamatan || 11, suffix: ' Kec', title: 'Pemantauan cuaca', sub: 'Open-Meteo & BMKG 24/7' },
-    { n: 12, suffix: ' Posko', title: 'Posko pengungsian', sub: 'Terpetakan di 11 Kecamatan' },
-    { n: 20, suffix: '+ Titik', title: 'Sumber air bersih', sub: 'PDAM Tirta Mayang & Tangki' },
-    { n: 8, suffix: ' Ruas', title: 'Jalur evakuasi', sub: 'pgRouting peka risiko banjir' },
-  ]
-
   return (
     <section className="proof" id="proof">
       <div className="wrap">
@@ -57,11 +56,11 @@ export default function Proof() {
             <div key={i}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">{p}</svg></div>
           ))}
         </div>
-        <BlurText as="h2" className="sm">rekam jejak & data terintegrasi SIRANDU</BlurText>
-        {dynamicMetrics.map((m, i) => (
-          <div className="mrow rv" key={m.title} style={i === dynamicMetrics.length - 1 ? { borderBottom: '1px solid var(--line)' } : undefined}>
-            <small><b>{m.title}</b>{m.sub}<br />(Database PostGIS Terhubung)</small>
-            <div className="big"><Count to={m.n} />{m.suffix}</div>
+        <BlurText as="h2" className="sm">rekam jejak SIRANDU</BlurText>
+        {METRICS.map((m, i) => (
+          <div className="mrow rv" key={m.title} style={i === METRICS.length - 1 ? { borderBottom: '1px solid var(--line)' } : undefined}>
+            <small><b>{m.title}</b>{m.sub}{(errorCuaca || m.n == null) && <><br />(data belum tersedia)</>}</small>
+            <div className={`big${m.n == null ? ' empty' : ''}`}><Count to={m.n} />{m.n == null ? '' : m.suffix}</div>
           </div>
         ))}
       </div>

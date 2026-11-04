@@ -1,79 +1,38 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getCuacaKecamatan, syncCuacaSekarang } from '../services/api.js';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { getCuacaKecamatan, getPoskoPengungsian, getSumberAirBersih, getRuasJalanTergenang } from '../services/api.js'
 
-const WebgisContext = createContext(null);
+const Ctx = createContext(null)
+const REFRESH_MS = 5 * 60 * 1000
 
+/** Data bersama: cuaca 11 kecamatan (refresh 5 menit), hitungan layer untuk statistik, dan kontrol peta WebGIS. */
 export function WebgisProvider({ children }) {
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [mapParams, setMapParams] = useState({ kecamatan: 'Semua', lat: null, lng: null });
-  const [cuacaData, setCuacaData] = useState([]);
-  const [ringkasan, setRingkasan] = useState({ total_kecamatan: 11, siaga: 0, waspada: 0, normal: 11, data_tertunda_fallback: 0 });
-  const [loadingCuaca, setLoadingCuaca] = useState(true);
-  const [syncing, setSyncing] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false)
+  const [mapParams, setMapParams] = useState({ kecamatan: 'Semua', lat: null, lng: null })
+  const [cuaca, setCuaca] = useState({ data: [], ringkasan: null, loading: true, error: null })
+  const [counts, setCounts] = useState({ posko: null, airBersih: null, jalanTergenang: null })
 
-  const fetchCuaca = useCallback(async () => {
-    setLoadingCuaca(true);
-    const res = await getCuacaKecamatan();
-    if (res && res.success) {
-      setCuacaData(res.data || []);
-      if (res.ringkasan_kota) {
-        setRingkasan(res.ringkasan_kota);
-      }
-    }
-    setLoadingCuaca(false);
-  }, []);
+  const refreshCuaca = useCallback(async () => {
+    try {
+      const r = await getCuacaKecamatan()
+      setCuaca({ data: r.data || [], ringkasan: r.ringkasan_kota || null, loading: false, error: null })
+    } catch (e) { setCuaca((s) => ({ ...s, loading: false, error: e })) }
+  }, [])
 
-  const triggerSync = useCallback(async () => {
-    setSyncing(true);
-    await syncCuacaSekarang();
-    await fetchCuaca();
-    setSyncing(false);
-  }, [fetchCuaca]);
+  useEffect(() => { refreshCuaca(); const t = setInterval(refreshCuaca, REFRESH_MS); return () => clearInterval(t) }, [refreshCuaca])
 
   useEffect(() => {
-    fetchCuaca();
-    // Auto-refresh weather every 5 minutes
-    const interval = setInterval(fetchCuaca, 300000);
-    return () => clearInterval(interval);
-  }, [fetchCuaca]);
+    const n = (p) => p.then((g) => g?.features?.length ?? 0, () => null)
+    const tergenang = getRuasJalanTergenang().then((g) => g?.features?.filter((f) => f.properties?.status_tergenang).length ?? 0, () => null)
+    Promise.all([n(getPoskoPengungsian()), n(getSumberAirBersih()), tergenang]).then(([posko, airBersih, jalanTergenang]) => setCounts({ posko, airBersih, jalanTergenang }))
+  }, [])
 
-  const openMap = useCallback((opts = {}) => {
-    setMapParams({
-      kecamatan: opts.kecamatan || 'Semua',
-      lat: opts.lat || null,
-      lng: opts.lng || null
-    });
-    setIsMapOpen(true);
-  }, []);
+  const openMap = useCallback((o = {}) => { setMapParams({ kecamatan: o.kecamatan || 'Semua', lat: o.lat ?? null, lng: o.lng ?? null, mode: o.mode || null, layers: o.layers || null }); setIsMapOpen(true) }, [])
+  const closeMap = useCallback(() => setIsMapOpen(false), [])
 
-  const closeMap = useCallback(() => {
-    setIsMapOpen(false);
-  }, []);
-
-  return (
-    <WebgisContext.Provider
-      value={{
-        isMapOpen,
-        mapParams,
-        openMap,
-        closeMap,
-        cuacaData,
-        ringkasan,
-        loadingCuaca,
-        syncing,
-        refreshCuaca: fetchCuaca,
-        triggerSync
-      }}
-    >
-      {children}
-    </WebgisContext.Provider>
-  );
+  const value = useMemo(() => ({
+    isMapOpen, mapParams, openMap, closeMap,
+    cuacaData: cuaca.data, ringkasan: cuaca.ringkasan, loadingCuaca: cuaca.loading, errorCuaca: cuaca.error, refreshCuaca, counts,
+  }), [isMapOpen, mapParams, openMap, closeMap, cuaca, refreshCuaca, counts])
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
-
-export function useWebgis() {
-  const ctx = useContext(WebgisContext);
-  if (!ctx) {
-    throw new Error('useWebgis must be used within a WebgisProvider');
-  }
-  return ctx;
-}
+export function useWebgis() { const c = useContext(Ctx); if (!c) throw new Error('useWebgis harus di dalam WebgisProvider'); return c }

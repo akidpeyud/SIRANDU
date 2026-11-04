@@ -20,3 +20,6 @@ npm run preview
 ## Yang masih placeholder
 Foto tim, nama anggota ke-2, tautan sosial, peta Kota Jambi (poligon abstrak), dan angka ilustrasi.
 Latar hero bisa diganti foto lewat variabel CSS `--hero-img` pada `.hero`.
+
+## Menyambungkan ke backend
+Baca `CATATAN_INTEGRASI.md` (cara menjalankan, status enam poin, temuan). Semua panggilan API ada di `src/services/api.js`.
