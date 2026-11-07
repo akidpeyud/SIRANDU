@@ -1,0 +1,13 @@
+{
+  "name": "sirandu-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistem Informasi Rawan Bencana Terpadu (SIRANDU) Kota Jambi",
+  "scripts": {
+    "start": "node webgis-banjir-backend/index.js",
+    "dev:backend": "cd webgis-banjir-backend && npm run dev",
+    "dev:frontend": "cd webgis-banjir-frontend && npm run dev",
+    "build:frontend": "cd webgis-banjir-frontend && npm run build",
+    "install:all": "cd webgis-banjir-backend && npm install && cd ../webgis-banjir-frontend && npm install"
+  }
+}
