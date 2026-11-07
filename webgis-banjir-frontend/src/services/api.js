@@ -3,7 +3,7 @@
  * Semua fungsi mengembalikan data atau MELEMPAR ApiError (pesan aman ditampilkan ke pengguna),
  * sehingga komponen bisa menampilkan toast. Basis URL: VITE_API_URL, default '/api' (proxy Vite → backend :3000).
  */
-const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+const API_BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 const TIMEOUT_MS = 12000
 
 export class ApiError extends Error {
