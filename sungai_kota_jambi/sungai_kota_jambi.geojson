@@ -1,0 +1,772 @@
+{
+  "type": "FeatureCollection",
+  "name": "sungai_kota_jambi",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "ID": 1,
+        "NAMOBJ": "Sungai Batanghari (Alur Utama)",
+        "TIPSNG": "Sungai Utama",
+        "KLSSNG": "Ordo 1",
+        "FCODE": "BA0020000",
+        "PJG_KM": 20.23,
+        "REMARK": "Sungai utama Provinsi Jambi yang membelah Kota Jambi",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.535,
+            -1.598
+          ],
+          [
+            103.545,
+            -1.593
+          ],
+          [
+            103.555,
+            -1.59
+          ],
+          [
+            103.565,
+            -1.587
+          ],
+          [
+            103.575,
+            -1.585
+          ],
+          [
+            103.585,
+            -1.586
+          ],
+          [
+            103.595,
+            -1.588
+          ],
+          [
+            103.605,
+            -1.59
+          ],
+          [
+            103.615,
+            -1.5895
+          ],
+          [
+            103.625,
+            -1.585
+          ],
+          [
+            103.635,
+            -1.578
+          ],
+          [
+            103.645,
+            -1.569
+          ],
+          [
+            103.655,
+            -1.563
+          ],
+          [
+            103.665,
+            -1.561
+          ],
+          [
+            103.678,
+            -1.56
+          ],
+          [
+            103.692,
+            -1.562
+          ],
+          [
+            103.705,
+            -1.566
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "ID": 2,
+        "NAMOBJ": "Sungai Batanghari (Percabangan Utara)",
+        "TIPSNG": "Sungai Utama",
+        "KLSSNG": "Ordo 1",
+        "FCODE": "BA0020000",
+        "PJG_KM": 5.73,
+        "REMARK": "Alur percabangan sisi seberang Kota Jambi (Pelayangan)",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.58,
+            -1.583
+          ],
+          [
+            103.59,
+            -1.582
+          ],
+          [
+            103.6,
+            -1.583
+          ],
+          [
+            103.61,
+            -1.584
+          ],
+          [
+            103.62,
+            -1.582
+          ],
+          [
+            103.63,
+            -1.577
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "ID": 3,
+        "NAMOBJ": "Sungai Asam",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0020000",
+        "PJG_KM": 8.0,
+        "REMARK": "Sistem drainase utama pengendali banjir melintasi Jelutung-Pasar Jambi",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.602,
+            -1.66
+          ],
+          [
+            103.604,
+            -1.652
+          ],
+          [
+            103.606,
+            -1.644
+          ],
+          [
+            103.609,
+            -1.636
+          ],
+          [
+            103.611,
+            -1.628
+          ],
+          [
+            103.613,
+            -1.62
+          ],
+          [
+            103.615,
+            -1.612
+          ],
+          [
+            103.616,
+            -1.604
+          ],
+          [
+            103.617,
+            -1.596
+          ],
+          [
+            103.6175,
+            -1.59
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "ID": 4,
+        "NAMOBJ": "Sungai Asam (Cabang Jelutung)",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 2.47,
+        "REMARK": "Cabang anak sungai asam kawasan Jelutung",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.628,
+            -1.63
+          ],
+          [
+            103.623,
+            -1.623
+          ],
+          [
+            103.618,
+            -1.616
+          ],
+          [
+            103.615,
+            -1.612
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "properties": {
+        "ID": 5,
+        "NAMOBJ": "Sungai Maram",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0020000",
+        "PJG_KM": 3.19,
+        "REMARK": "Melintasi kawasan bersejarah Pasar Lama Jambi dan Kelenteng Hok Tek",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.593,
+            -1.612
+          ],
+          [
+            103.596,
+            -1.607
+          ],
+          [
+            103.599,
+            -1.602
+          ],
+          [
+            103.603,
+            -1.597
+          ],
+          [
+            103.607,
+            -1.593
+          ],
+          [
+            103.611,
+            -1.59
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "properties": {
+        "ID": 6,
+        "NAMOBJ": "Sungai Tembuku",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0020000",
+        "PJG_KM": 5.19,
+        "REMARK": "Sistem sungai dan stasiun pompa pengendali banjir Jambi Timur/Sijenjang",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.638,
+            -1.615
+          ],
+          [
+            103.64,
+            -1.607
+          ],
+          [
+            103.642,
+            -1.599
+          ],
+          [
+            103.643,
+            -1.591
+          ],
+          [
+            103.644,
+            -1.583
+          ],
+          [
+            103.645,
+            -1.575
+          ],
+          [
+            103.645,
+            -1.569
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 7,
+      "properties": {
+        "ID": 7,
+        "NAMOBJ": "Sungai Kenali Besar",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0020000",
+        "PJG_KM": 8.54,
+        "REMARK": "Hulu kawasan Alam Barajo mengalir ke Danau Sipin",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.555,
+            -1.665
+          ],
+          [
+            103.558,
+            -1.654
+          ],
+          [
+            103.56,
+            -1.642
+          ],
+          [
+            103.562,
+            -1.63
+          ],
+          [
+            103.565,
+            -1.618
+          ],
+          [
+            103.568,
+            -1.608
+          ],
+          [
+            103.57,
+            -1.598
+          ],
+          [
+            103.571,
+            -1.59
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 8,
+      "properties": {
+        "ID": 8,
+        "NAMOBJ": "Sungai Kenali Kecil",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 6.11,
+        "REMARK": "Anak sungai di kawasan Kenali Asam Bawah & Paal Lima",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.582,
+            -1.655
+          ],
+          [
+            103.58,
+            -1.643
+          ],
+          [
+            103.577,
+            -1.631
+          ],
+          [
+            103.574,
+            -1.62
+          ],
+          [
+            103.571,
+            -1.61
+          ],
+          [
+            103.568,
+            -1.602
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 9,
+      "properties": {
+        "ID": 9,
+        "NAMOBJ": "Danau Sipin (Alur Perairan)",
+        "TIPSNG": "Danau / Oxbow",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0010000",
+        "PJG_KM": 2.73,
+        "REMARK": "Alur perairan danau tapal kuda Danau Sipin terhubung ke Batanghari",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.572,
+            -1.592
+          ],
+          [
+            103.576,
+            -1.591
+          ],
+          [
+            103.58,
+            -1.59
+          ],
+          [
+            103.585,
+            -1.589
+          ],
+          [
+            103.589,
+            -1.588
+          ],
+          [
+            103.593,
+            -1.5875
+          ],
+          [
+            103.596,
+            -1.588
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 10,
+      "properties": {
+        "ID": 10,
+        "NAMOBJ": "Sungai Buluran",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 2.06,
+        "REMARK": "Melintasi Buluran Kenali menuju Danau Sipin",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.56,
+            -1.605
+          ],
+          [
+            103.565,
+            -1.599
+          ],
+          [
+            103.57,
+            -1.594
+          ],
+          [
+            103.573,
+            -1.592
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 11,
+      "properties": {
+        "ID": 11,
+        "NAMOBJ": "Sungai Kambang",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 3.11,
+        "REMARK": "Melintasi kawasan Telanaipura dekat RSUD Raden Mattaher",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.585,
+            -1.618
+          ],
+          [
+            103.587,
+            -1.612
+          ],
+          [
+            103.589,
+            -1.605
+          ],
+          [
+            103.592,
+            -1.598
+          ],
+          [
+            103.595,
+            -1.592
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 12,
+      "properties": {
+        "ID": 12,
+        "NAMOBJ": "Sungai Putri",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 2.2,
+        "REMARK": "Alur anak sungai di Kelurahan Sungai Putri Telanaipura",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.59,
+            -1.608
+          ],
+          [
+            103.593,
+            -1.602
+          ],
+          [
+            103.597,
+            -1.596
+          ],
+          [
+            103.6,
+            -1.591
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 13,
+      "properties": {
+        "ID": 13,
+        "NAMOBJ": "Sungai Legok",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 1.03,
+        "REMARK": "Alur drainase dan anak sungai di Kelurahan Legok",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.594,
+            -1.595
+          ],
+          [
+            103.598,
+            -1.592
+          ],
+          [
+            103.601,
+            -1.589
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 14,
+      "properties": {
+        "ID": 14,
+        "NAMOBJ": "Sungai Selincah",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 2",
+        "FCODE": "BA0020000",
+        "PJG_KM": 9.06,
+        "REMARK": "Mengalir dari Paal Merah/Payo Selincah menuju Batanghari",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.66,
+            -1.645
+          ],
+          [
+            103.662,
+            -1.633
+          ],
+          [
+            103.664,
+            -1.621
+          ],
+          [
+            103.665,
+            -1.609
+          ],
+          [
+            103.666,
+            -1.597
+          ],
+          [
+            103.667,
+            -1.585
+          ],
+          [
+            103.667,
+            -1.573
+          ],
+          [
+            103.666,
+            -1.564
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 15,
+      "properties": {
+        "ID": 15,
+        "NAMOBJ": "Sungai Lubuk Rusan",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 6.4,
+        "REMARK": "Anak sungai di kawasan Jambi Timur dan Sijenjang",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.65,
+            -1.625
+          ],
+          [
+            103.652,
+            -1.613
+          ],
+          [
+            103.654,
+            -1.601
+          ],
+          [
+            103.656,
+            -1.589
+          ],
+          [
+            103.657,
+            -1.577
+          ],
+          [
+            103.658,
+            -1.568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 16,
+      "properties": {
+        "ID": 16,
+        "NAMOBJ": "Sungai Bakung",
+        "TIPSNG": "Anak Sungai",
+        "KLSSNG": "Ordo 3",
+        "FCODE": "BA0020000",
+        "PJG_KM": 5.01,
+        "REMARK": "Aliran anak sungai kawasan Paal Merah",
+        "KAB_KOTA": "Kota Jambi",
+        "PROVINSI": "Jambi",
+        "SUMBER": "Badan Informasi Geospasial / Pemkot Jambi"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.635,
+            -1.65
+          ],
+          [
+            103.642,
+            -1.64
+          ],
+          [
+            103.648,
+            -1.63
+          ],
+          [
+            103.652,
+            -1.62
+          ],
+          [
+            103.655,
+            -1.61
+          ]
+        ]
+      }
+    }
+  ]
+}
