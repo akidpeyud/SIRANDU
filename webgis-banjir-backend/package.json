@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "db:setup": "node scripts/db-setup.js",
     "db:import-banjir": "node scripts/import-titik-banjir.js",
-    "db:export-sungai": "node scripts/export-sungai-js.js"
+    "db:export-sungai": "node scripts/export-sungai-js.js",
+    "db:export-elevasi": "node scripts/export-elevasi-js.js"
   },
   "keywords": [],
   "author": "",
