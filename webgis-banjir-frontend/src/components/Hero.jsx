@@ -6,7 +6,7 @@ import heroImg from '../assets/hero.jpg'
 const LINES = [['tahu', 'risiko,'], ['siap', 'bertindak.']]
 
 export default function Hero() {
-  const { openMap, ringkasan } = useWebgis()
+  const { ringkasan } = useWebgis()
   const heroRef = useRef(null)
   const canvasRef = useRef(null)
   const lnRefs = useRef([])
@@ -92,7 +92,6 @@ export default function Hero() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .8-5.2 4.8 1.5 7.2L12 18l-6.3 3.8 1.5-7.2L2 9.8 9 9z" /></svg>
                 {ringkasan ? <><b>{ringkasan.normal}/{ringkasan.total_kecamatan}</b> kecamatan normal</> : <><b>5 kelas</b> curah hujan</>} <i /> pantau <b>24/7</b>
               </div>
-              <button type="button" className="btn white" onClick={() => openMap()}>Buka peta <span className="arr">↗</span></button>
             </div>
           </div>
         </div>
