@@ -58,3 +58,26 @@ export const hitungRuteEvakuasi = (lat, lng, poskoId, signal) => request('/evaku
 
 // ---- Notifikasi email (F06) ----
 export const subscribeEmail = (email, idKecamatan) => request('/subscribe', { method: 'POST', body: { email, id_kecamatan: Number(idKecamatan) } })
+
+// ---- Riwayat cuaca (langsung ke Open-Meteo, tanpa API key) ----
+/**
+ * Riwayat 7 hari + 24 jam terakhir untuk satu titik. Open-Meteo = sumber yang sama dengan penarikan backend.
+ * → { hourly: { time[], precipitation[], temperature_2m[], relative_humidity_2m[] }, daily: { time[], precipitation_sum[], temperature_2m_max[], temperature_2m_min[], precipitation_hours[] } }
+ */
+export async function getRiwayatOpenMeteo(lat, lng, signal) {
+  const q = new URLSearchParams({
+    latitude: lat, longitude: lng, timezone: 'Asia/Jakarta', past_days: 7, forecast_days: 1,
+    hourly: 'precipitation,temperature_2m,relative_humidity_2m',
+    daily: 'precipitation_sum,temperature_2m_max,temperature_2m_min,precipitation_hours',
+  })
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
+  signal?.addEventListener('abort', () => ctrl.abort())
+  try {
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${q}`, { signal: ctrl.signal })
+    if (!res.ok) throw new ApiError(`Open-Meteo menolak permintaan (${res.status})`, res.status)
+    return await res.json()
+  } catch (e) {
+    if (e instanceof ApiError) throw e
+    throw new ApiError(e.name === 'AbortError' ? 'Open-Meteo tidak merespons.' : 'Tidak dapat terhubung ke Open-Meteo.')
+  } finally { clearTimeout(t) }
+}

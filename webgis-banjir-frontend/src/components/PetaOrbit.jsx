@@ -1,148 +1,183 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import BlurText from '../lib/BlurText.jsx'
 import { useWebgis } from '../context/WebgisContext.jsx'
 import { RING_INFO as RING_BASE } from '../data/content.js'
 import { prefersReducedMotion } from '../lib/motion.jsx'
+import { JAMBI_GEO } from '../data/jambiGeo.js'
+import { getPoskoPengungsian, getSumberAirBersih, getRuasJalanTergenang } from '../services/api.js'
+import { pointsFrom, linesFrom } from './map3d/geo.js'
 
-const RINGS = [[170, 105], [300, 185], [440, 265]]
-const ROT = (-6 * Math.PI) / 180
-const NODES = [
-  { r: 0, t: 0.2, s: 0.13 }, { r: 0, t: 3.6, s: 0.13 }, { r: 1, t: 1.4, s: -0.09 }, { r: 1, t: 4.4, s: -0.09 },
-  { r: 2, t: 0.6, s: 0.06 }, { r: 2, t: 2.6, s: 0.06 }, { r: 2, t: 4.9, s: 0.06 },
+// three.js (~600 kB) hanya diunduh saat section peta mendekati layar
+const JambiMap3D = lazy(() => import('./map3d/JambiMap3D.jsx'))
+
+/**
+ * Warna khusus peta, divalidasi dengan validator palet dataviz (beda warna aman buta warna):
+ * status memakai urutan lampu lalu lintas yang umum dipakai peringatan dini (hijau → merah),
+ * sedangkan tiap lapis titik punya satu warna yang kontras dengan daratan terang.
+ */
+export const MAP_STATUS = [
+  { key: 'normal', label: 'Normal', color: '#34a065', note: 'aman' },
+  { key: 'waspada', label: 'Waspada', color: '#e8c13a', note: 'pantau' },
+  { key: 'siaga', label: 'Siaga', color: '#e8731f', note: 'bersiap' },
+  { key: 'awas', label: 'Awas', color: '#b02a2a', note: 'evakuasi' },
 ]
-const FAR = [[60, 430], [930, 90], [940, 590], [210, 60]]
-const ANCHORS = [0, 3, 4, 6]
-const CHIP_RING = { 'Posko pengungsian': 0, 'Kelas curah hujan': 1, 'Titik air bersih': 2, 'Jalan tergenang': 3 }
-const CHIPS = [
-  { r: 0, n: '12', t: 'Posko pengungsian', left: '22%', top: '20%' },
-  { r: 1, n: '5', t: 'Kelas curah hujan', left: '56%', top: '26%' },
-  { r: 2, n: '20+', t: 'Titik air bersih', left: '70%', top: '80%' },
-  { r: 0, n: '8', t: 'Jalan tergenang', left: '88%', top: '56%' },
+const STATUS_COLOR = Object.fromEntries(MAP_STATUS.map((s) => [s.key, s.color]))
+const statusColor = (s) => STATUS_COLOR[String(s || 'normal').split(' ')[0].toLowerCase()] || STATUS_COLOR.normal
+const LEGEND = [
+  [{ c: '#ffb020', t: 'Posko pengungsian', shape: 'pin' }],
+  null,
+  [{ c: '#3ad1ff', t: 'Sumber air bersih', shape: 'pin' }],
+  [{ c: '#ff4d8d', t: 'Jalan tergenang', shape: 'line' }, { c: '#ffffff', t: 'Jalan lain', shape: 'line', dim: true }],
+]
+const LAYER_KEYS = ['posko', 'hujan', 'air', 'jalan']
+const LAYER_HINT = [
+  'Pin kuning = posko pengungsian. Sentuh atau arahkan kursor ke pin untuk melihat namanya.',
+  'Tinggi & warna tiap kecamatan = curah hujan terkini dan status peringatannya.',
+  'Pin biru muda = sumber air bersih: sumur, hidran, dan tangki darurat.',
+  'Garis merah muda putus-putus = ruas jalan yang sedang tergenang dan dihindari rute evakuasi.',
 ]
 
-const pos = (ri, t) => {
-  const [a, b] = RINGS[ri], x = a * Math.cos(t), y = b * Math.sin(t)
-  return [500 + x * Math.cos(ROT) - y * Math.sin(ROT), 330 + x * Math.sin(ROT) + y * Math.cos(ROT)]
+const hasWebGL = () => {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')) } catch { return false }
+}
+
+/** Cadangan 2D (tanpa WebGL): peta datar dari geometri yang sama. */
+function FlatMap({ layer, cuacaByName, hover, setHover, onPick }) {
+  const xs = JAMBI_GEO.outline.map((p) => p[0]), ys = JAMBI_GEO.outline.map((p) => p[1])
+  const pad = 0.6, minX = Math.min(...xs) - pad, maxY = Math.max(...ys) + pad
+  const w = Math.max(...xs) - minX + pad, h = maxY - Math.min(...ys) + pad
+  const pt = ([x, y]) => `${(x - minX).toFixed(3)},${(maxY - y).toFixed(3)}`
+  return (
+    <svg className="m3d-flat" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Peta kecamatan Kota Jambi">
+      <polygon points={JAMBI_GEO.water.map(pt).join(' ')} fill="#2a78d6" />
+      {JAMBI_GEO.kecamatan.map((d) => {
+        const c = cuacaByName(d.nama)
+        return (
+          <polygon key={d.nama} points={d.ring.map(pt).join(' ')} tabIndex={0}
+            fill={layer === 1 && c ? statusColor(c.status_peringatan) : hover?.nama === d.nama ? '#ffffff' : '#f4efe3'}
+            stroke="#0B3C5D" strokeWidth="0.04" style={{ cursor: 'pointer' }}
+            onMouseEnter={() => setHover({ kind: 'kec', nama: d.nama, km2: d.km2, cuaca: c })} onMouseLeave={() => setHover(null)}
+            onFocus={() => setHover({ kind: 'kec', nama: d.nama, km2: d.km2, cuaca: c })} onClick={() => onPick(d)} />
+        )
+      })}
+    </svg>
+  )
 }
 
 export default function PetaOrbit() {
-  const secRef = useRef(null), stageRef = useRef(null), orbRef = useRef(null), dustRef = useRef(null)
-  const nodeEls = useRef([]), linkEls = useRef([])
-  const [seen, setSeen] = useState(false)
-  const [cur, setCur] = useState(0)
-  const [hold, setHold] = useState(false)
+  const secRef = useRef(null), stageRef = useRef(null)
+  const [near, setNear] = useState(false)    // mulai unduh 3D
+  const [inView, setInView] = useState(false) // render loop hanya saat terlihat
+  const [cur, setCur] = useState(1)
+  const [hover, setHover] = useState(null)
+  const [sat, setSat] = useState('loading')
+  const [geo, setGeo] = useState({ posko: null, air: null, jalan: null })
+  const webgl = useMemo(() => typeof window !== 'undefined' && hasWebGL(), [])
+  const coarse = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, [])
+  const reduce = useMemo(() => prefersReducedMotion(), [])
 
-  // masuk viewport -> peta & chip muncul
   useEffect(() => {
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setSeen(true), { threshold: 0.1 })
-    io.observe(secRef.current)
-    return () => io.disconnect()
+    const a = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: '600px 0px' })
+    const b = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.05 })
+    a.observe(secRef.current); b.observe(stageRef.current)
+    return () => { a.disconnect(); b.disconnect() }
   }, [])
 
-  // siklus cincin tiap 4 detik (berhenti saat hover)
+  // GeoJSON lapis titik/garis dari server (gagal = lapis kosong, bukan data karangan)
   useEffect(() => {
-    if (hold) return
-    const id = setTimeout(() => setCur((c) => (c + 1) % 4), 4000)
-    return () => clearTimeout(id)
-  }, [cur, hold])
+    if (!near) return
+    const ctl = new AbortController()
+    const take = (k, p) => p.then((g) => setGeo((s) => ({ ...s, [k]: g })), () => setGeo((s) => ({ ...s, [k]: false })))
+    take('posko', getPoskoPengungsian(undefined, ctl.signal)); take('air', getSumberAirBersih(undefined, ctl.signal)); take('jalan', getRuasJalanTergenang(ctl.signal))
+    return () => ctl.abort()
+  }, [near])
 
-  // animasi orbit + debu partikel + parallax kursor
-  useEffect(() => {
-    const stage = stageRef.current, orb = orbRef.current, dc = dustRef.current, dx = dc.getContext('2d')
-    const reduce = prefersReducedMotion()
-    const nodes = NODES.map((n) => ({ ...n, x: 0, y: 0 }))
-    let sx = 0, sy = 0, tsx = 0, tsy = 0, DW, DH, dots = []
-    const dpr = () => Math.min(window.devicePixelRatio || 1, 2)
-    const resize = () => {
-      const d = dpr(); DW = dc.width = stage.clientWidth * d; DH = dc.height = stage.clientHeight * d
-      dots = Array.from({ length: 260 }, () => { const a = Math.random() * 6.283, r = Math.pow(Math.random(), 0.6) * 0.5; return { x: DW / 2 + Math.cos(a) * r * DW * 1.1, y: DH / 2 + Math.sin(a) * r * DH * 1.2, z: Math.random(), p: Math.random() * 6.283 } })
-    }
-    resize(); window.addEventListener('resize', resize)
-    const onMove = (e) => { const r = stage.getBoundingClientRect(); tsx = (e.clientX - r.left) / r.width - 0.5; tsy = (e.clientY - r.top) / r.height - 0.5 }
-    stage.addEventListener('pointermove', onMove)
-    let T0 = performance.now(), raf
-    const loop = (now) => {
-      const dt = (now - T0) / 1000; T0 = now
-      sx += (tsx - sx) * 0.05; sy += (tsy - sy) * 0.05
-      nodes.forEach((n, i) => {
-        if (!reduce) n.t += n.s * dt
-        const [x, y] = pos(n.r, n.t); n.x = x; n.y = y
-        const el = nodeEls.current[i]; if (el) { el.setAttribute('cx', x); el.setAttribute('cy', y) }
-      })
-      linkEls.current.forEach((l, i) => {
-        if (!l) return; const a = nodes[ANCHORS[i]]
-        l.setAttribute('x1', a.x); l.setAttribute('y1', a.y); l.setAttribute('x2', FAR[i][0]); l.setAttribute('y2', FAR[i][1])
-      })
-      orb.style.transform = `translate(${sx * -14}px,${sy * -10}px)`
-      dx.clearRect(0, 0, DW, DH)
-      for (const p of dots) {
-        p.p += 0.015 + p.z * 0.01
-        const a = 0.25 + 0.55 * Math.abs(Math.sin(p.p))
-        dx.fillStyle = `rgba(200,232,248,${a * (0.4 + p.z * 0.6)})`
-        dx.fillRect(p.x + sx * -30 * p.z * dpr() + Math.sin(now / 3000 + p.z * 9) * 3, p.y + sy * -20 * p.z * dpr(), 1 + p.z * 1.6, 1 + p.z * 1.6)
-      }
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); stage.removeEventListener('pointermove', onMove) }
-  }, [])
+  const { openMap, ringkasan, counts, cuacaData } = useWebgis()
+  const posko = useMemo(() => pointsFrom(geo.posko), [geo.posko])
+  const air = useMemo(() => pointsFrom(geo.air), [geo.air])
+  const roads = useMemo(() => linesFrom(geo.jalan), [geo.jalan])
+  const cuacaByName = (n) => cuacaData.find((k) => String(k.nama_kecamatan).toLowerCase().replace(/[^a-z]/g, '') === n.toLowerCase().replace(/[^a-z]/g, '')) || null
 
-  const ringOn = Math.min(cur, 2)
-  const { openMap, ringkasan, counts } = useWebgis()
   const nums = [counts.posko, ringkasan ? 5 : null, counts.airBersih, counts.jalanTergenang]
   const RING_INFO = RING_BASE.map((r, i) => ({ ...r, n: nums[i] == null ? '–' : String(nums[i]) }))
   const info = RING_INFO[cur]
+  const layerData = [geo.posko, cuacaData.length ? true : null, geo.air, geo.jalan][cur]
+  const layerEmpty = cur === 1 ? !cuacaData.length : layerData === false || (layerData && [posko, null, air, roads][cur]?.length === 0)
+  const onPick = (d) => openMap({ kecamatan: d.nama, layers: cur === 1 ? null : [LAYER_KEYS[cur] === 'hujan' ? 'zona' : LAYER_KEYS[cur]] })
 
   return (
-    <section className={`net${seen ? ' in' : ''}`} id="peta" ref={secRef}>
+    <section className={`net${near ? ' in' : ''}`} id="peta" ref={secRef}>
       <div className="wrap">
         <div className="net-head">
           <span className="tag rv">Peta Kota Jambi</span>
           <BlurText as="h2">Satu peta, empat lapis perlindungan untuk warga Jambi.</BlurText>
-          <p className="lead rv">Dari titik rumah Anda, SIRANDU menghubungkan zona risiko, posko, jalur evakuasi, dan sumber air bersih di sekitar Sungai Batanghari.</p>
+          <p className="lead rv">Sebelas kecamatan, Sungai Batanghari di tengahnya. Putar petanya, pilih lapisan, dan klik kecamatan untuk membukanya di peta interaktif.</p>
           <div className="net-cta"><button type="button" className="btn pri rv" onClick={() => openMap()}>Buka peta interaktif <span className="arr">→</span></button><a className="net-link rv" href="#fitur">Lihat semua fitur ↗</a></div>
         </div>
       </div>
 
-      <div className="stage" ref={stageRef}>
-        <canvas ref={dustRef} />
-        <div className="halo" />
-        <svg className="orb" ref={orbRef} viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          <g className="mapg" transform="translate(500 330) rotate(-6)">
-            <path className="dist" d="M-330 -60 L-210 -150 L-60 -130 L20 -190 L170 -150 L300 -70 L330 40 L220 140 L60 170 L-80 150 L-240 110 Z" />
-            <path className="dist" d="M-210 -150 L-100 -20 L20 -190 M-100 -20 L60 20 L170 -150 M60 20 L220 140 M-100 -20 L-80 150" />
-            <path className="river" d="M-360 30 C-260 -30 -200 80 -110 40 S40 -40 120 10 S260 90 360 20" />
-          </g>
-          <g transform="translate(500 330) rotate(-6)">
-            {RINGS.map(([rx, ry], i) => <ellipse key={i} className={`ring${ringOn === i ? ' on' : ''}`} rx={rx} ry={ry} />)}
-          </g>
-          <g stroke="rgba(255,255,255,.28)" strokeWidth="1">{FAR.map((_, i) => <line key={i} ref={(el) => (linkEls.current[i] = el)} />)}</g>
-          <g>
-            {NODES.map((n, i) => <circle key={i} ref={(el) => (nodeEls.current[i] = el)} r={n.r === 0 ? 5 : 4} fill="#fff" />)}
-            {FAR.map((f, i) => <circle key={`f${i}`} cx={f[0]} cy={f[1]} r="4" fill="#6EC1E4" />)}
-          </g>
-        </svg>
-        <div className="core" aria-label="SIRANDU">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0B3C5D" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c3 4.2 6 7 6 10.5a6 6 0 0 1-12 0C6 10 9 7.2 12 3z" /></svg>
+      <div className="m3d" ref={stageRef}>
+        <div className="m3d-glow" aria-hidden="true" />
+        {near && webgl && (
+          <Suspense fallback={<div className="m3d-load"><i />Menyiapkan peta 3D…</div>}>
+            <JambiMap3D layer={cur} cuaca={cuacaData} statusColor={statusColor} posko={posko} air={air} roads={roads}
+              hover={hover} setHover={setHover} onPick={onPick} active={inView} coarse={coarse} reduce={reduce} onSatStatus={setSat} />
+          </Suspense>
+        )}
+        {near && !webgl && <FlatMap layer={cur} cuacaByName={cuacaByName} hover={hover} setHover={setHover} onPick={onPick} />}
+
+        {/* panel info (kiri atas) */}
+        <div className="m3d-panel" aria-live="polite">
+          {hover?.kind === 'kec' ? (
+            <>
+              <small>Kecamatan</small>
+              <b>{hover.nama}</b>
+              <span>{hover.km2} km²</span>
+              {hover.cuaca ? (
+                <span className="m3d-st" style={{ '--c': statusColor(hover.cuaca.status_peringatan) }}><i />{hover.cuaca.status_peringatan || 'Normal'} · {Number(hover.cuaca.curah_hujan_terkini || 0).toFixed(1)} mm</span>
+              ) : <span className="m3d-mute">Data cuaca belum tersedia</span>}
+              <em>Klik untuk membuka di peta</em>
+            </>
+          ) : hover ? (
+            <>
+              <small>{hover.kind === 'posko' ? 'Posko pengungsian' : 'Sumber air bersih'}</small>
+              <b>{hover.name || 'Tanpa nama'}</b>
+            </>
+          ) : (
+            <>
+              <small>{info.kicker}</small>
+              <p>{LAYER_HINT[cur]}</p>
+              {layerEmpty && <span className="m3d-mute">Data lapisan ini muncul setelah server SIRANDU terhubung.</span>}
+            </>
+          )}
         </div>
-        {CHIPS.map((c) => (
-          <div key={c.t} className={`chip${c.r === ringOn ? ' on' : ''}`} style={{ left: c.left, top: c.top }}><b>{RING_INFO[CHIP_RING[c.t]].n}</b><span>{c.t}</span></div>
-        ))}
+
+        <ul className="m3d-legend" aria-label="Legenda peta">
+          {cur === 1
+            ? MAP_STATUS.map((r) => <li key={r.key}><i className="sw" style={{ background: r.color }} /><span><b>{r.label}</b>{r.note}</span></li>)
+            : LEGEND[cur].map((l) => <li key={l.t} className={l.dim ? 'dim' : ''}><i className={l.shape} style={{ '--c': l.c }} /><span><b>{l.t}</b></span></li>)}
+          <li className="sep"><i className="line" style={{ '--c': '#8fdcff' }} /><span><b>Arus Sungai Batanghari</b></span></li>
+          <li><i className="line" style={{ '--c': '#ffffff' }} /><span><b>Batas kecamatan</b>{cur === 1 ? 'tinggi kolom = curah hujan' : 'klik untuk buka'}</span></li>
+          <li><i className="line" style={{ '--c': '#6EC1E4' }} /><span><b>Batas Kota Jambi</b></span></li>
+        </ul>
+        <span className="m3d-attr">{sat === 'err' ? 'Citra satelit tidak dapat dimuat · ' : ''}Citra satelit © Esri, Maxar, Earthstar Geographics</span>
+        <div className="m3d-compass" aria-hidden="true"><b>U</b><i /></div>
+        {!coarse && <span className="m3d-hint" aria-hidden="true">Seret untuk memutar</span>}
       </div>
 
       <div className="wrap">
-        <div className="rings-info">
+        <div className="rings-info" role="tablist" aria-label="Lapisan peta">
           {RING_INFO.map((r, i) => (
-            <div key={r.label} className={`rc${cur === i ? ' on' : ''}`}
-              onMouseEnter={() => { setCur(i); setHold(true) }} onMouseLeave={() => setHold(false)} onClick={() => setCur(i)}
+            <button type="button" role="tab" aria-selected={cur === i} key={r.label} className={`rc${cur === i ? ' on' : ''}`}
+              onClick={() => { setCur(i); setHover(null) }}
               onPointerMove={(e) => { const b = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', e.clientX - b.left + 'px'); e.currentTarget.style.setProperty('--my', e.clientY - b.top + 'px') }}>
               <i className="dt" /><b>{r.n}</b><span>{r.label}</span>
-            </div>
+            </button>
           ))}
         </div>
         <div className="ring-desc">
           <div><small>{info.kicker}</small><p>{info.text}</p></div>
-          <small>ANGKA &amp; PETA = ILUSTRASI</small>
+          <small>BATAS KECAMATAN: BPS · DATA LAPISAN: SERVER SIRANDU</small>
         </div>
       </div>
     </section>

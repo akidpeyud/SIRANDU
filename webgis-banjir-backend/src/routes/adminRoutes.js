@@ -31,6 +31,7 @@ const {
   getLogNotifikasiAdmin,
   getPelangganNotifikasiAdmin,
 } = require("../controllers/adminCrudController");
+const { importLayer, importSummary } = require("../controllers/adminImportController");
 
 // 1. Autentikasi Admin (Publik)
 router.post("/login", loginAdmin);
@@ -81,5 +82,9 @@ router.put("/bobot-model/:id", updateBobotModel);
 // 9. Log Notifikasi & Pemantauan Data
 router.get("/log-notifikasi", getLogNotifikasiAdmin);
 router.get("/pelanggan-notifikasi", getPelangganNotifikasiAdmin);
+
+// 10. Impor layer poligon/garis dari file (GeoJSON/KML/Shapefile yang sudah diurai di frontend)
+router.get("/import/summary", importSummary);
+router.post("/import/:layer", importLayer);
 
 module.exports = router;

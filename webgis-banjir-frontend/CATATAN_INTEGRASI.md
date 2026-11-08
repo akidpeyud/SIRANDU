@@ -31,3 +31,19 @@ File halaman bawaan backend yang ditambal ada di `backend-patch/public/` (timpa 
 
 ## Yang belum teruji
 Pengujian saya memakai server API tiruan dengan **bentuk respons yang sama** dengan controller backend (dibaca dari kode), bukan PostgreSQL/PostGIS/pgRouting sungguhan. Alur login admin dan CRUD admin belum dijalankan end-to-end. Sebelum demo, jalankan sekali dengan backend asli.
+
+## Pembaruan halaman peta (Nov 2026)
+- **Alamat sendiri:** peta terbuka di `#/peta?kec=..&layers=..&lat=..&lng=..`. Refresh membuka keadaan yang sama; tombol Kembali di browser menutup peta.
+- **Titik lokasi** hanya dari GPS atau koordinat (klik peta tidak menaruh titik). Kolom latitude menerima tempelan `-1.61, 103.61`.
+- **Batas & label 11 kecamatan** dibundel di `src/data/kecamatanJambi.json` (gabungan batas kelurahan BPS), selalu tampil walau server mati. Layer server `batas` kini dipakai untuk garis kelurahan.
+- **Urutan tumpuk layer tetap** lewat pane Leaflet (elevasi < zona < sungai < batas < kecamatan < jalan < rute), jadi tidak berubah saat layer dinyalakan bergantian.
+- **Riwayat cuaca** (`components/map/WeatherHistory.jsx`): 24 jam dari `GET /api/cuaca/:id` (cadangan: Open-Meteo), 7 hari langsung dari Open-Meteo (`services/api.js → getRiwayatOpenMeteo`). Bila backend nanti punya endpoint riwayat sendiri, cukup ganti fungsi itu.
+
+## Panel admin & impor file (Nov 2026)
+- Panel admin di `#/admin` (kode di `src/admin/`, dimuat terpisah). Login memakai `POST /api/admin/login`.
+- **Impor dari file** (`#/admin/impor`): CSV/TSV, Excel .xlsx, GeoJSON, KML, GPX, Shapefile .zip.
+  - Posko, air bersih, titik banjir, jalan tergenang, curah hujan → endpoint admin yang sudah ada, per baris.
+  - Zona rawan, ketinggian tanah, sungai, batas kelurahan → endpoint baru `POST /api/admin/import/:layer`
+    (`webgis-banjir-backend/src/controllers/adminImportController.js`), plus `GET /api/admin/import/summary`.
+  - Backend: `express.json` dinaikkan ke 30 MB di `index.js`. Cadangan file lama: `index.js.bak-sebelum-impor`, `src/routes/adminRoutes.js.bak-sebelum-impor`.
+  - Batas kelurahan selalu di-upsert (tidak pernah dihapus) karena `wilayah_administrasi` dirujuk tabel lain dengan ON DELETE CASCADE.

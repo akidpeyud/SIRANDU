@@ -1,0 +1,23 @@
+const S = (d, w = 18) => <svg viewBox="0 0 24 24" width={w} height={w} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
+export const Ico = {
+  home: S(<><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /></>),
+  posko: S(<><path d="M4 20V10l8-6 8 6v10z" /><path d="M10 20v-6h4v6" /></>),
+  air: S(<path d="M12 3c3 4 6 7 6 10.5a6 6 0 0 1-12 0C6 10 9 7 12 3z" />),
+  banjir: S(<><path d="M3 15c3-3 6-3 9 0s6 3 9 0" /><path d="M3 20c3-3 6-3 9 0s6 3 9 0" /><path d="M12 3v8" /></>),
+  jalan: S(<><path d="M8 3L5 21M16 3l3 18" /><path d="M12 5v2M12 11v2M12 17v2" /></>),
+  rain: S(<><path d="M7 15a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.5 3.5 0 0 1 17 15z" /><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2" /></>),
+  sliders: S(<><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></>),
+  mail: S(<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>),
+  plus: S(<path d="M12 5v14M5 12h14" />, 16),
+  search: S(<><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></>, 16),
+  refresh: S(<><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 4v7h-7" /></>, 16),
+  edit: S(<><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M14 6l4 4" /></>, 16),
+  trash: S(<><path d="M4 7h16M10 11v6M14 11v6" /><path d="M6 7l1 13h10l1-13M9 7V4h6v3" /></>, 16),
+  x: S(<path d="M6 6l12 12M18 6L6 18" />, 16),
+  out: S(<><path d="M15 4h4v16h-4" /><path d="M10 8l-4 4 4 4M6 12h10" /></>, 16),
+  globe: S(<><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>, 16),
+  upload: S(<><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></>, 22),
+  file: S(<><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z" /><path d="M14 3v5h5" /></>, 20),
+  imp: S(<><path d="M12 4v11M7 10l5 5 5-5" /><path d="M4 19h16" /></>),
+  menu: S(<path d="M4 7h16M4 12h16M4 17h16" />),
+}
