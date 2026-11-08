@@ -59,6 +59,10 @@ export default function Nav() {
         <div className="navr">
           <div className="clock" aria-label="Waktu Jambi"><i /><span>Jambi</span><b style={{ fontWeight: 500 }}>{time}</b></div>
           <button type="button" className="menu-btn map-btn" onClick={() => openMap()}>PETA</button>
+          <a className="menu-btn admin-btn" href="#/admin" aria-label="Masuk admin" title="Masuk admin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            <span>ADMIN</span>
+          </a>
           <button className="menu-btn" aria-expanded={open} aria-controls="overlay" onClick={() => setOpen((o) => !o)}>
             MENU
             <svg className="chev" width="22" height="14" viewBox="0 0 22 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2l5 5-5 5M18 2l-5 5 5 5" /></svg>
@@ -68,6 +72,7 @@ export default function Nav() {
       <nav className={`overlay${open ? ' open' : ''}`} id="overlay" aria-label="Navigasi utama" onClick={() => setOpen(false)}>
         {NAV_LINKS.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
         <a href="#peta" onClick={(e) => { e.preventDefault(); openMap() }}>Peta WebGIS ↗</a>
+        <a href="#/admin" className="ov-admin">Masuk admin ↗</a>
       </nav>
     </>
   )
